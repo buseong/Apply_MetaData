@@ -9,9 +9,10 @@ from get_melon_chart import get_chart
 
 
 def get_search_result(title, artist):
-    service = Service(ChromeDriverManager().install())
+    # service = Service(ChromeDriverManager().install())
     url = 'https://www.youtube.com/results?search_query=' + urllib.parse.quote(f'{title} {artist} official audio')
-    driver = webdriver.Chrome(service=service)
+    print(url)
+    driver = webdriver.Chrome(executable_path='chromedriver.exe')
     driver.get(url)
     f_video = driver.find_elements(By.ID, 'video-title')
     video_list = [i.get_attribute('href') for i in f_video if i.get_attribute('href') is not None]
@@ -36,7 +37,6 @@ def download_yt(url, target):
 
 
 def get_music(title, artist, target, num=0):
-    print(target)
     download_yt(get_search_result(title, artist)[num], target)
 
 
@@ -83,7 +83,7 @@ def get_set_tag(music_id, target):
 
 
 if __name__ == '__main__':
-    title, artist, music_id = get_chart(1)
+    title, artist, music_id = get_chart(0)
     target = os.getcwd() + '\\' + f'{title}.mp3'
     get_music(title, artist, target)
     get_set_tag(music_id, target)
