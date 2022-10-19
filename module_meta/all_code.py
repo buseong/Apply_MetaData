@@ -1,7 +1,7 @@
 """
 Made by Buseong
-2022-10-16
-ver 0.12.9
+2022-10-20
+ver 0.12.10
 """
 import os
 import re
