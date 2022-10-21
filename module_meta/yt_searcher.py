@@ -1,10 +1,8 @@
 import yt_dlp
+from main_code import *
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
 
-from all_code import *
 from get_melon_chart import get_chart
 
 

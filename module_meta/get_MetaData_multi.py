@@ -2,7 +2,7 @@ import multiprocessing
 import os
 import time
 
-from .all_code import get_mp3, start, arr_work
+from .main_code import get_mp3, start, arr_work
 
 
 def apply_meta(target):
