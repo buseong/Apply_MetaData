@@ -8,7 +8,7 @@ import eyed3
 from bs4 import BeautifulSoup
 from eyed3.id3.frames import ImageFrame
 
-from Data import *
+from .Data import *
 
 arr_work: list = []
 
@@ -53,7 +53,7 @@ def get_title_artist(music_info: tuple) -> int:
     artist = music_info[1]
     try:
         title = re.sub('\(*\)*', '', title)
-        if 'Instrumental' in title:
+        if 'Instrumental' or '(Inst.)' in title:
             title = title.rstrip('Instrumental')
         print(title)
         return get_music_id(title=title, artist=artist)
