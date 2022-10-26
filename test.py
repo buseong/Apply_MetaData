@@ -12,10 +12,10 @@ if __name__ == '__main__':
 
 # or
 
-if __name__ == '__main__':
-    # target = os.getcwd() + '/music'
-    target_1 = r"G:\pyecharm\pythonProject\pythonProject\Apply_MetaData\msuic_1\\"
-    target_2 = r"F:\ProgramData\Microsoft\NIVDA\hiromi_downloader_GuI__2\hitomi_downloaded_youtube"
-    copy_file(target_1, target_2)
-    a1(target_1)
+#if __name__ == '__main__':
+   # target = os.getcwd() + '/music'
+#    target_1 = r"G:\pyecharm\pythonProject\pythonProject\Apply_MetaData\msuic_1\\"
+#    target_2 = r"F:\ProgramData\Microsoft\NIVDA\hiromi_downloader_GuI__2\hitomi_downloaded_youtube"
+#    copy_file(target_1, target_2)
+#    a1(target_1)
 

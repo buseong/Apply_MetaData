@@ -19,12 +19,6 @@ arr_work: list = []
 
 
 def get_soup(url: str, usage: str):
-    """
-    get soup through bs4
-    :param usage: usage
-    :param url: get soup for url
-    :return: Soup
-    """
     opener = urllib.request.build_opener()
     header = headers[randint(0, len(headers) - 1)]
     opener.addheaders = header
@@ -37,13 +31,6 @@ def get_soup(url: str, usage: str):
 
 
 def get_music_id(title: str, artist: str = '') -> int:
-    """
-    Get music in melon
-    :param title: str, title of mpeg-3 file
-    :param artist: str, artist of mpeg-3 file
-    # :param search_number: int, not recommend change
-    :return: album title, album artist, album id in melon
-    """
     print(title, artist)
     if artist != '':
         url = "https://www.melon.com/search/song/index.htm?q=" + urllib.parse.quote(title) \
@@ -105,12 +92,6 @@ def get_title_artist_mp3(target_mp3: str) -> tuple:
 
 
 def get_tag(music_id: int, target: str) -> str or int:
-    """
-    Get album name, album artist, track number(Not working), album id, album year album genre
-    :param target: mpeg-3 target
-    :param music_id: int, music id in melon
-    :return: album name, album artist, track number(Not working), album id, album year album genre
-    """
     url = "https://www.melon.com/song/detail.htm?songId=" + str(music_id)
     soup = get_soup(url, 'get_tag')
     album_artist = soup.select('.artist_name')[0].get_text()
@@ -150,12 +131,6 @@ def get_artist(artist_id: int or str) -> bytes:
 
 
 def get_image_track(album_id: str or int, title: str) -> bytes or tuple:
-    """
-    Get album cover image
-    :param title: str, music title
-    :param album_id: str, album id
-    :return: album cover image address in explorer
-    """
     try:
         url = "https://www.melon.com/album/detail.htm?albumId=" + str(album_id)
         soup = get_soup(url, 'get_album_img')
@@ -184,12 +159,6 @@ def get_image_track(album_id: str or int, title: str) -> bytes or tuple:
 
 
 def save_tag(target, **kwargs):
-    """
-    Save tag to mpeg-3
-    :param target: to save mpeg-3 file
-    :param kwargs: title, album, recording_date, album_artist, genre, track_num, artist, lyrics, image
-    :return:
-    """
     eyed3.log.setLevel("ERROR")
     audio_file = eyed3.load(target)
     if not audio_file.tag:
@@ -210,11 +179,6 @@ def save_tag(target, **kwargs):
 
 
 def start(target: str):
-    """
-    start program that to save lyric through melon for k-pop
-    :param target: to save lyric mpeg-3 file
-    :return: None
-    """
     print(target)
     album_name, album_artist, title, album_id, years, genre, lyric\
         = get_tag(get_title_artist(get_title_artist_mp3(target)), target)
@@ -235,10 +199,6 @@ def start(target: str):
 
 
 def get_mp3(target: str) -> list:
-    """
-    get target mpeg-3 file metadata
-    :return: None
-    """
     folder = target.replace("\\", "/") + '/'
     now_file_edit = []
     for i in os.listdir(folder):
