@@ -5,9 +5,9 @@ ver 0.12.10
 """
 import os
 import re
-import urllib
 from random import randint
 from urllib import request
+from urllib.parse import quote
 
 import eyed3
 from bs4 import BeautifulSoup
@@ -19,11 +19,11 @@ arr_work: list = []
 
 
 def get_soup(url: str, usage: str):
-    opener = urllib.request.build_opener()
+    opener = request.build_opener()
     header = headers[randint(0, len(headers) - 1)]
     opener.addheaders = header
-    urllib.request.install_opener(opener)
-    html = urllib.request.urlopen(url)
+    request.install_opener(opener)
+    html = request.urlopen(url)
     Soup = BeautifulSoup(html.read(), "html.parser")
     print(f"{usage} : {url}")
     html.close()
@@ -33,11 +33,11 @@ def get_soup(url: str, usage: str):
 def get_music_id(title: str, artist: str = '') -> int:
     print(title, artist)
     if artist != '':
-        url = "https://www.melon.com/search/song/index.htm?q=" + urllib.parse.quote(title) \
-              + '+' + urllib.parse.quote(artist)
+        url = "https://www.melon.com/search/song/index.htm?q=" + quote(title) \
+              + '+' + quote(artist)
         print(f"{title} + {artist} : {url}")
     else:
-        url = "https://www.melon.com/search/song/index.htm?q=" + urllib.parse.quote(title)
+        url = "https://www.melon.com/search/song/index.htm?q=" + quote(title)
         print(f"{title} : {url}")
     soup = get_soup(url, 'get_melon_info')
     music_id_list = [int(re.findall('\'(.+?)\'', str(re.findall(r'searchLog\((.+?)\);', k['href'])[0]).split(',')[music_id_l])[0]) for k in soup.select(".fc_gray")]
