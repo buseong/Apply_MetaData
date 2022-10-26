@@ -201,9 +201,7 @@ def start(target: str):
 def get_mp3(target: str) -> list:
     folder = target.replace("\\", "/") + '/'
     now_file_edit = []
-    for i in os.listdir(folder):
-        if os.path.splitext(i)[1] == '.mp3':
-            now_file_edit.append(folder + i)
+    now_file_edit = [now_file_edit.append(folder + i) for i in os.listdir(folder) if os.path.splitext(i)[1] == '.mp3']
     return now_file_edit
 
 
