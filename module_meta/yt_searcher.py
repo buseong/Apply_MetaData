@@ -1,14 +1,15 @@
+from urllib.parse import quote
+
 import yt_dlp
-from main_code import *
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 from get_melon_chart import get_chart
+from main_code import *
 
 
 def get_search_result(title, artist):
-    # service = Service(ChromeDriverManager().install())
-    url = 'https://www.youtube.com/results?search_query=' + urllib.parse.quote(f'{title} {artist} official audio')
+    url = 'https://www.youtube.com/results?search_query=' + quote(f'{title} {artist} official audio')
     print(url)
     driver = webdriver.Chrome(executable_path='chromedriver.exe')
     driver.get(url)
@@ -39,12 +40,6 @@ def get_music(title, artist, target, num=0):
 
 
 def save_tag_(target, **kwargs):
-    """
-    Save tag to mpeg-3
-    :param target: to save mpeg-3 file
-    :param kwargs: title, album, recording_date, album_artist, genre, track_num, artist, lyrics, image
-    :return:
-    """
     eyed3.log.setLevel("ERROR")
     audio_file = eyed3.load(target)
     if not audio_file.tag:

@@ -13,7 +13,7 @@ import eyed3
 from bs4 import BeautifulSoup
 from eyed3.id3.frames import ImageFrame
 
-from .Data import *
+from Data import *
 
 arr_work: list = []
 
