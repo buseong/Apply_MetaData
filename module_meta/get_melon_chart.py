@@ -10,12 +10,6 @@ arr_work: list = []
 
 
 def get_soup(url: str, usage: str):
-    """
-    get soup through bs4
-    :param usage: usage
-    :param url: get soup for url
-    :return: Soup
-    """
     opener = urllib.request.build_opener()
     header = headers[randint(0, len(headers) - 1)]
     opener.addheaders = header

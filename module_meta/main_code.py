@@ -1,8 +1,3 @@
-"""
-Made by Buseong
-2022-10-20
-ver 0.12.10
-"""
 import os
 import re
 from random import randint
