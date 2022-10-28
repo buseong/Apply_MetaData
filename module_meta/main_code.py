@@ -27,24 +27,46 @@ def get_soup(url: str, usage: str):
 
 def get_music_id(title: str, artist: str = '') -> int:
     print(title, artist)
-    if artist != '':
-        url = "https://www.melon.com/search/song/index.htm?q=" + quote(title) \
-              + '+' + quote(artist)
-        print(f"{title} + {artist} : {url}")
-    else:
-        url = "https://www.melon.com/search/song/index.htm?q=" + quote(title)
-        print(f"{title} : {url}")
-    soup = get_soup(url, 'get_melon_info')
-    music_id_list = [int(re.findall('\'(.+?)\'', str(re.findall(r'searchLog\((.+?)\);', k['href'])[0]).split(',')[music_id_l])[0]) for k in soup.select(".fc_gray")]
-    # album_list = [soup.select('.fc_mgray')[i].get_text() for i in range(len(soup.select(".fc_mgray"))) if i % 3 == 2]
-    title_list = [str(j['title']).rstrip(' - 페이지 이동') for j in soup.select(".fc_gray")]
-    _music_id = [music_id_list[title_list.index(i)] for i in title_list if i == title]
-    if len(_music_id) == 0:
-        _music_id = [music_id_list[title_list.index(i)] for i in title_list if i in title or title in i]
-    if len(_music_id) == 0:
-        music_id = int(music_id_list[0])
-    else:
-        music_id = int(_music_id[0])
+    try:
+        if artist != '':
+            url = "https://www.melon.com/search/song/index.htm?q=" + quote(title) \
+                  + '+' + quote(artist)
+            print(f"{title} + {artist} : {url}")
+        else:
+            url = "https://www.melon.com/search/song/index.htm?q=" + quote(title)
+            print(f"{title} : {url}")
+        soup = get_soup(url, 'get_melon_info')
+        music_id_list = [int(re.findall('\'(.+?)\'', str(re.findall(r'searchLog\((.+?)\);', k['href'])[0]).split(',')[music_id_l])[0]) for k in soup.select(".fc_gray")]
+        # album_list = [soup.select('.fc_mgray')[i].get_text() for i in range(len(soup.select(".fc_mgray"))) if i % 3 == 2]
+        title_list = [str(j['title']).rstrip(' - 페이지 이동') for j in soup.select(".fc_gray")]
+        _music_id = [music_id_list[title_list.index(i)] for i in title_list if i == title]
+        if len(_music_id) == 0:
+            _music_id = [music_id_list[title_list.index(i)] for i in title_list if i in title or title in i]
+        if len(_music_id) == 0:
+            music_id = int(music_id_list[0])
+        else:
+            music_id = int(_music_id[0])
+    except(Exception,):
+        if artist != '':
+            url = "https://www.melon.com/search/total/index.htm?q=" + quote(title) \
+                  + '+' + quote(artist)
+            print(f"{title} + {artist} : {url}")
+        else:
+            if title == '':
+                raise
+            url = "https://www.melon.com/search/total/index.htm?q=" + quote(title)
+            print(f"{title} : {url}")
+        soup = get_soup(url, 'get_melon_info')
+        music_id_list = [int(re.findall('\'(.+?)\'', str(re.findall(r'searchLog\((.+?)\);', k['href'])[0]).split(',')[music_id_l])[0]) for k in soup.select(".fc_gray")]
+        # album_list = [soup.select('.fc_mgray')[i].get_text() for i in range(len(soup.select(".fc_mgray"))) if i % 3 == 2]
+        title_list = [str(j['title']).rstrip(' - 페이지 이동') for j in soup.select(".fc_gray")]
+        _music_id = [music_id_list[title_list.index(i)] for i in title_list if i == title]
+        if len(_music_id) == 0:
+            _music_id = [music_id_list[title_list.index(i)] for i in title_list if i in title or title in i]
+        if len(_music_id) == 0:
+            music_id = int(music_id_list[0])
+        else:
+            music_id = int(_music_id[0])
     return music_id
 
 
@@ -53,9 +75,6 @@ def get_title_artist(music_info: tuple) -> int:
     artist = music_info[1]
     try:
         title = re.sub('\(*\)*', '', title)
-        if 'Instrumental' or '(Inst.)' in title:
-            title = title.rstrip('Instrumental')
-        print(title)
         return get_music_id(title=title, artist=artist)
     except(Exception,):
         try:

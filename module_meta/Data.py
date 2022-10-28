@@ -17,6 +17,9 @@ tran_name: dict[str, str] = {
              'Orange Caramel': '오렌지 캬라멜',
              'Ulala Session':  '울랄라세션',
              'LOVELYZ': '러블리즈',
+             'Solar Ft. Justo': '솔라',
+             'Whee In': '휘인',
+             'Younha': '윤하',
 
              }
 
