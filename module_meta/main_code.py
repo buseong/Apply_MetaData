@@ -74,17 +74,17 @@ def get_title_artist(music_info: tuple) -> int:
     title = music_info[0]
     artist = music_info[1]
     try:
-        title = re.sub('\(*\)*', '', title)
-        return get_music_id(title=title, artist=artist)
+        return get_music_id(title=re.sub('\(*\)*', '', title), artist=artist)
     except(Exception,):
         try:
-            return get_music_id(title=' '.join(re.findall(r'[가-힣]+', title)), artist=artist)
+            return get_music_id(title=re.sub('\\([^)]*\\)+', '', title), artist=artist)
         except(Exception,):
             try:
                 return get_music_id(title=title)
             except(Exception,):
                 try:
-                    return get_music_id(title=re.sub('\\([^)]*\\)', '', title), artist=artist)
+                    return get_music_id(title=' '.join(re.findall(r'[가-힣]+', title)), artist=artist)
+
                 except(Exception,):
                     raise ValueError(f"Didn't search {title}, {artist}")
 

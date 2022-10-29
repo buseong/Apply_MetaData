@@ -20,6 +20,7 @@ tran_name: dict[str, str] = {
              'Solar Ft. Justo': '솔라',
              'Whee In': '휘인',
              'Younha': '윤하',
+             'Moonbyul': '문별',
 
              }
 
