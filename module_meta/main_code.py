@@ -26,47 +26,23 @@ def get_soup(url: str, usage: str):
 
 
 def get_music_id(title: str, artist: str = '') -> int:
-    print(title, artist)
-    try:
-        if artist != '':
-            url = "https://www.melon.com/search/song/index.htm?q=" + quote(title) \
-                  + '+' + quote(artist)
-            print(f"{title} + {artist} : {url}")
-        else:
-            url = "https://www.melon.com/search/song/index.htm?q=" + quote(title)
-            print(f"{title} : {url}")
-        soup = get_soup(url, 'get_melon_info')
-        music_id_list = [int(re.findall('\'(.+?)\'', str(re.findall(r'searchLog\((.+?)\);', k['href'])[0]).split(',')[music_id_l])[0]) for k in soup.select(".fc_gray")]
-        # album_list = [soup.select('.fc_mgray')[i].get_text() for i in range(len(soup.select(".fc_mgray"))) if i % 3 == 2]
-        title_list = [str(j['title']).rstrip(' - 페이지 이동') for j in soup.select(".fc_gray")]
-        _music_id = [music_id_list[title_list.index(i)] for i in title_list if i == title]
-        if len(_music_id) == 0:
-            _music_id = [music_id_list[title_list.index(i)] for i in title_list if i in title or title in i]
-        if len(_music_id) == 0:
-            music_id = int(music_id_list[0])
-        else:
-            music_id = int(_music_id[0])
-    except(Exception,):
-        if artist != '':
-            url = "https://www.melon.com/search/total/index.htm?q=" + quote(title) \
-                  + '+' + quote(artist)
-            print(f"{title} + {artist} : {url}")
-        else:
-            if title == '':
-                raise
-            url = "https://www.melon.com/search/total/index.htm?q=" + quote(title)
-            print(f"{title} : {url}")
-        soup = get_soup(url, 'get_melon_info')
-        music_id_list = [int(re.findall('\'(.+?)\'', str(re.findall(r'searchLog\((.+?)\);', k['href'])[0]).split(',')[music_id_l])[0]) for k in soup.select(".fc_gray")]
-        # album_list = [soup.select('.fc_mgray')[i].get_text() for i in range(len(soup.select(".fc_mgray"))) if i % 3 == 2]
-        title_list = [str(j['title']).rstrip(' - 페이지 이동') for j in soup.select(".fc_gray")]
-        _music_id = [music_id_list[title_list.index(i)] for i in title_list if i == title]
-        if len(_music_id) == 0:
-            _music_id = [music_id_list[title_list.index(i)] for i in title_list if i in title or title in i]
-        if len(_music_id) == 0:
-            music_id = int(music_id_list[0])
-        else:
-            music_id = int(_music_id[0])
+    if artist != '':
+        url = "https://www.melon.com/search/song/index.htm?q=" + quote(title) + '+' + quote(artist)
+        print(f"{title} + {artist} : {url}")
+    else:
+        url = "https://www.melon.com/search/song/index.htm?q=" + quote(title)
+        print(f"{title} : {url}")
+    soup = get_soup(url, 'get_melon_info').select(".fc_gray")
+    music_id_list = [int(re.findall('\'(.+?)\'', str(re.findall(r'searchLog\((.+?)\);', k['href'])[0]).split(',')[music_id_l])[0]) for k in soup]
+    # album_list = [soup.select('.fc_mgray')[i].get_text() for i in range(len(soup.select(".fc_mgray"))) if i % 3 == 2]
+    title_list = [str(j['title']).rstrip(' - 페이지 이동') for j in soup]
+    music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i is title]
+    if len(music_id_list_) == 0:
+        music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i in title or title in i]
+    if len(music_id_list_) == 0:
+        music_id = int(music_id_list[0])
+    else:
+        music_id = int(music_id_list_[0])
     return music_id
 
 
@@ -184,10 +160,11 @@ def save_tag(target, **kwargs):
             elif k == 'track_num':
                 audio_file.tag.track_num = v
             elif k == 'image':
-                audio_file.tag.images.remove(u'')
                 audio_file.tag.images.set(ImageFrame.FRONT_COVER, v, 'image/jpeg')
             else:
                 exec(f'audio_file.tag.{k} = "{v}"')
+        else:
+            print(f'{k} is not in {key_list}')
     audio_file.tag.save(encoding='utf-8')
     return
 
@@ -216,17 +193,3 @@ def get_mp3(target: str) -> list:
     folder = target.replace("\\", "/") + '/'
     now_file_edit = [folder + i for i in os.listdir(folder) if os.path.splitext(i)[1] == '.mp3']
     return now_file_edit
-
-
-def check_meta(target):
-    audio_file = eyed3.load(target)
-    return (
-            audio_file.tag.album_artist,
-            audio_file.tag.title,
-            audio_file.tag.album,
-            audio_file.tag.genre,
-            audio_file.tag.artist,
-            audio_file.tag.recording_date,
-            audio_file.tag.track_num,
-            audio_file.tag.lyrics
-            )
