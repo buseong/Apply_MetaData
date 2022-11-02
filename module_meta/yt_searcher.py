@@ -60,7 +60,7 @@ def save_tag_(target, **kwargs):
 
 def get_set_tag(music_id, target):
     album_name, album_artist, title, album_id, year, genre, lyric = get_tag(music_id, target)
-    img, track_num = get_image_track(album_id, title)
+    img, track_num = get_image_N_track(album_id, title)
     save_tag_(
         album=album_name,
         album_artist=album_artist,

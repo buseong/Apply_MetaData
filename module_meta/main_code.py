@@ -10,8 +10,6 @@ from eyed3.id3.frames import ImageFrame
 
 from .Data import *
 
-arr_work: list = []
-
 
 def get_soup(url: str, usage: str):
     opener = request.build_opener()
@@ -25,18 +23,12 @@ def get_soup(url: str, usage: str):
     return Soup
 
 
-def get_music_id(title: str, artist: str = '') -> int:
-    if artist != '':
-        url = "https://www.melon.com/search/song/index.htm?q=" + quote(title) + '+' + quote(artist)
-        print(f"{title} + {artist} : {url}")
-    else:
-        url = "https://www.melon.com/search/song/index.htm?q=" + quote(title)
-        print(f"{title} : {url}")
+def _get_music_id(url: str, title: str) -> int:
     soup = get_soup(url, 'get_melon_info').select(".fc_gray")
-    music_id_list = [int(re.findall('\'(.+?)\'', str(re.findall(r'searchLog\((.+?)\);', k['href'])[0]).split(',')[music_id_l])[0]) for k in soup]
-    # album_list = [soup.select('.fc_mgray')[i].get_text() for i in range(len(soup.select(".fc_mgray"))) if i % 3 == 2]
+    music_id_list = [int(re.findall(r'melon.play.playSong\(\'.+?\',(.+?)\);', str(k))[0]) for k in soup]
     title_list = [str(j['title']).rstrip(' - 페이지 이동') for j in soup]
     music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i is title]
+    # album_list = [soup[i[0]].get_text() for i in enumerate(soup) if i[0] % 3 == 2]
     if len(music_id_list_) == 0:
         music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i in title or title in i]
     if len(music_id_list_) == 0:
@@ -46,21 +38,34 @@ def get_music_id(title: str, artist: str = '') -> int:
     return music_id
 
 
-def get_title_artist(music_info: tuple) -> int:
+def get_music_id_by_title_artist(title: str, artist: str) -> int:
+    url = "https://www.melon.com/search/song/index.htm?q=" + quote(title) + '+' + quote(artist)
+    print(f"{title} + {artist} : {url}")
+    music_id = _get_music_id(url, title)
+    return music_id
+
+
+def get_music_id_by_title(title: str) -> int:
+    url = "https://www.melon.com/search/song/index.htm?q=" + quote(title)
+    print(f"{title} : {url}")
+    music_id = _get_music_id(url, title)
+    return music_id
+
+
+def get_music_id(music_info: tuple) -> int:
     title = music_info[0]
     artist = music_info[1]
     try:
-        return get_music_id(title=re.sub('\(*\)*', '', title), artist=artist)
+        return get_music_id_by_title_artist(re.sub('\(*\)*', '', title), artist)
     except(Exception,):
         try:
-            return get_music_id(title=re.sub('\\([^)]*\\)+', '', title), artist=artist)
+            return get_music_id_by_title_artist(re.sub('\\([^)]*\\)+', '', title), artist)
         except(Exception,):
             try:
-                return get_music_id(title=title)
+                return get_music_id_by_title(title)
             except(Exception,):
                 try:
-                    return get_music_id(title=' '.join(re.findall(r'[가-힣]+', title)), artist=artist)
-
+                    return get_music_id_by_title_artist(' '.join(re.findall(r'[가-힣]+', title)), artist)
                 except(Exception,):
                     raise ValueError(f"Didn't search {title}, {artist}")
 
@@ -102,7 +107,6 @@ def get_tag(music_id: int, target: str) -> str or int:
     except(Exception,) as e:
         print('No lyric')
         print(e)
-        arr_work.append(target)
         lyric = ''
     if '19금' in title:
         raise ValueError("Don't get metadata")
@@ -110,17 +114,7 @@ def get_tag(music_id: int, target: str) -> str or int:
     return album_names, album_artist, title, album_id, year, genre, lyric
 
 
-def get_artist(artist_id: int or str) -> bytes:
-    url = 'https://www.melon.com/artist/timeline.htm?artistId=' + str(artist_id)
-    print(url)
-    soup = get_soup(url, 'get artist img')
-    artist_img_url = soup.select('meta[property="og:image"]')[0]['content']
-    print(artist_img_url)
-    img = request.urlopen(artist_img_url).read()
-    return img
-
-
-def get_image_track(album_id: str or int, title: str) -> bytes or tuple:
+def get_image_N_track(album_id: str or int, title: str) -> bytes and tuple:
     try:
         url = "https://www.melon.com/album/detail.htm?albumId=" + str(album_id)
         soup = get_soup(url, 'get_album_img')
@@ -172,8 +166,8 @@ def save_tag(target, **kwargs):
 def start(target: str):
     print(target)
     album_name, album_artist, title, album_id, years, genre, lyric\
-        = get_tag(get_title_artist(get_title_artist_mp3(target)), target)
-    img, track_num = get_image_track(album_id, title)
+        = get_tag(get_music_id(get_title_artist_mp3(target)), target)
+    img, track_num = get_image_N_track(album_id, title)
     save_tag(
             album=album_name,
             album_artist=album_artist,
@@ -189,7 +183,7 @@ def start(target: str):
     return
 
 
-def get_mp3(target: str) -> list:
+def get_mp3_address(target: str) -> list:
     folder = target.replace("\\", "/") + '/'
     now_file_edit = [folder + i for i in os.listdir(folder) if os.path.splitext(i)[1] == '.mp3']
     return now_file_edit

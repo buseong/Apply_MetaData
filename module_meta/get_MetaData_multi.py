@@ -2,7 +2,7 @@ import multiprocessing
 import os
 import time
 
-from .main_code import get_mp3, start, arr_work
+from .main_code import get_mp3_address, start
 
 
 def apply_meta(target):
@@ -22,22 +22,8 @@ def apply_meta(target):
     time_er = time.time() - timer
     print(f'Total : {time_er}')
     print(f'Avg__ : {time_er / len(arr)}')
-    print(f"not work : {arr_work}")
+    # print(f"not work : {arr_work}")
     return
-
-
-def check_meta(target):
-    audio_file = eyed3.load(target)
-    return (
-            audio_file.tag.album_artist,
-            audio_file.tag.title,
-            audio_file.tag.album,
-            audio_file.tag.genre,
-            audio_file.tag.artist,
-            audio_file.tag.recording_date,
-            audio_file.tag.track_num,
-            audio_file.tag.lyrics
-            )
 
 
 def sort_num(arr_, num):
@@ -59,14 +45,8 @@ def sort_num(arr_, num):
 
 
 def get_meta_multi(target: str = os.getcwd(), num: int = multiprocessing.cpu_count()):
-    """
-    start work multi-processing
-    :param target: explorer address
-    :param num: cpu thread num
-    :return:
-    """
     start_time = time.time()
-    arr = get_mp3(target)
+    arr = get_mp3_address(target)
     if len(arr) < num:
         raise ValueError(f'file num {len(arr)} > cpu num {num}')
     brr = sort_num(arr, num)

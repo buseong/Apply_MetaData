@@ -38,5 +38,3 @@ key_list: list[str] = ['title', 'album', 'track_num', 'artist', 'album_artist', 
 music_id_l: int = 4
 album_list_l: int = 3
 album_id_short: int = 7
-
-
