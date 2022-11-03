@@ -1,4 +1,4 @@
-tran_name: dict[str, str] = {
+artist_name_list: dict[str, str] = {
              'LOONA': '이달의 소녀',
              'SUNMI': '선미',
              'JOY': '조이',
@@ -21,6 +21,10 @@ tran_name: dict[str, str] = {
              'Whee In': '휘인',
              'Younha': '윤하',
              'Moonbyul': '문별',
+             'Davich': '다비치',
+             'MAKTUB': '마크툽',
+             'Jang Beom June': '장범준',
+             'J-Cera': '제이세라',
 
              }
 

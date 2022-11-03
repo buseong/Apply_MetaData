@@ -62,10 +62,10 @@ def get_music_id(music_info: tuple) -> int:
             return get_music_id_by_title_artist(re.sub('\\([^)]*\\)+', '', title), artist)
         except(Exception,):
             try:
-                return get_music_id_by_title(title)
+                return get_music_id_by_title_artist(' '.join(re.findall(r'[가-힣]+', title)), artist)
             except(Exception,):
                 try:
-                    return get_music_id_by_title_artist(' '.join(re.findall(r'[가-힣]+', title)), artist)
+                    return get_music_id_by_title(title)
                 except(Exception,):
                     raise ValueError(f"Didn't search {title}, {artist}")
 
@@ -77,13 +77,18 @@ def get_title_artist_mp3(target_mp3: str) -> tuple:
         artist = ''
     if ' - Topic' in artist:
         artist = artist.rstrip(" - Topic")
-    if artist in tran_name:
-        artist = tran_name[artist]
+    if artist in artist_name_list:
+        artist = artist_name_list[artist]
     title = str(audio_tag.title)
     if title == 'None' or None:
         title = str(audio_tag.album)
     info = (title, artist)
     return info
+
+
+def get_text_re(pattern, text) -> str:
+    after_text = str(re.findall(pattern, text)[0])
+    return after_text
 
 
 def get_tag(music_id: int, target: str) -> str or int:
@@ -92,14 +97,14 @@ def get_tag(music_id: int, target: str) -> str or int:
     album_artist = soup.select('.artist_name')[0].get_text()
     title = soup.select('.song_name')[0].get_text().replace('곡명', '').strip()
     album_name = soup.select('.list')[0]
-    album_name_ = str(album_name.get_text()).replace("\n", '')
-    album_id = ''.join(re.findall("[0-9]", str(re.findall('href="(.+?)"', str(album_name).replace("\n", '')))))
-    album_names = re.findall("앨범(.+?)발매일", album_name_)[0]
-    year = re.findall("발매일(.+?)장르", album_name_)[0].replace('.', '-')
-    if 'FLAC' in album_name_:
-        genre = re.findall("장르(.+?)FLAC", album_name_)[0]
+    music_info = str(album_name.get_text()).replace("\n", '')
+    album_id = re.findall('goAlbumDetail\(\'(.+?)\'\);', str(album_name))[0]
+    album_names = re.findall("앨범(.+?)발매일", music_info)[0]
+    year = re.findall("발매일(.+?)장르", music_info)[0].replace('.', '-')
+    if 'FLAC' in music_info:
+        genre = re.findall("장르(.+?)FLAC", music_info)[0]
     else:
-        genre = re.findall("장르(.+?)$", album_name_)[0]
+        genre = re.findall("장르(.+?)$", music_info)[0]
     for i in soup.find_all("br"):
         i.replace_with("\n")
     try:
