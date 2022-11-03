@@ -86,11 +86,6 @@ def get_title_artist_mp3(target_mp3: str) -> tuple:
     return info
 
 
-def get_text_re(pattern, text) -> str:
-    after_text = str(re.findall(pattern, text)[0])
-    return after_text
-
-
 def get_tag(music_id: int, target: str) -> str or int:
     url = "https://www.melon.com/song/detail.htm?songId=" + str(music_id)
     soup = get_soup(url, 'get_tag')
@@ -130,8 +125,7 @@ def get_image_N_track(album_id: str or int, title: str) -> bytes and tuple:
     print(f"album : {url}")
     urls = re.findall("(?:(?:https?|ftp)://)?[\\w/\\-?=%.]+\\.[\\w/\\-?=%.]+", str(album_img))[0]
     try:
-        urls = urls.replace('500.jpg', '1000.jpg')
-        img = request.urlopen(urls).read()
+        img = request.urlopen(urls.replace('500.jpg', '1000.jpg')).read()
     except(Exception,):
         img = request.urlopen(urls).read()
     print(f'album img url : {urls}')
