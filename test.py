@@ -1,7 +1,7 @@
 # import multiprocessing
 import os
 import argparse
-from module_meta.b_copy import copy_file
+from module_meta.b_copy import copy_file, remove_title_artist
 from module_meta.get_MetaData import apply_meta as a1
 from module_meta.get_MetaData_multi import get_meta_multi as a2
 
