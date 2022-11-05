@@ -39,14 +39,14 @@ def _get_music_id(url: str, title: str) -> int:
 
 
 def get_music_id_by_title_artist(title: str, artist: str) -> int:
-    url = "https://www.melon.com/search/song/index.htm?q=" + quote(title) + '+' + quote(artist)
+    url = MelonSong_tagUrl + quote(title) + '+' + quote(artist)
     print(f"{title} + {artist} : {url}")
     music_id = _get_music_id(url, title)
     return music_id
 
 
 def get_music_id_by_title(title: str) -> int:
-    url = "https://www.melon.com/search/song/index.htm?q=" + quote(title)
+    url = MelonSong_tagUrl + quote(title)
     print(f"{title} : {url}")
     music_id = _get_music_id(url, title)
     return music_id
@@ -86,8 +86,13 @@ def get_title_artist_mp3(target_mp3: str) -> tuple:
     return info
 
 
-def get_tag(music_id: int, target: str) -> str or int:
-    url = "https://www.melon.com/song/detail.htm?songId=" + str(music_id)
+def pprint(*args):
+    for i in args:
+        print(i, end=' | ')
+
+
+def get_tag(music_id: int or str, target: str) -> int or str:
+    url = MelonSongUrl + str(music_id)
     soup = get_soup(url, 'get_tag')
     album_artist = soup.select('.artist_name')[0].get_text()
     title = soup.select('.song_name')[0].get_text().replace('곡명', '').strip()
@@ -116,10 +121,10 @@ def get_tag(music_id: int, target: str) -> str or int:
 
 def get_image_N_track(album_id: str or int, title: str) -> bytes and tuple:
     try:
-        url = "https://www.melon.com/album/detail.htm?albumId=" + str(album_id)
+        url = MelonAlbumUrl + str(album_id)
         soup = get_soup(url, 'get_album_img')
     except(Exception,):
-        url = "https://www.melon.com/album/detail.htm?albumId=" + str(album_id[:album_id_short])
+        url = MelonAlbumUrl + str(album_id[:album_id_short])
         soup = get_soup(url, 'get_album_img')
     album_img = soup.select('meta[property="og:image"]')[0]
     print(f"album : {url}")
@@ -183,6 +188,8 @@ def start(target: str):
 
 
 def get_mp3_address(target: str) -> list:
+    if not isinstance(target, str):
+        raise ValueError(f'{target} is not string, {type(target)}')
     folder = target.replace("\\", "/") + '/'
     now_file_edit = [folder + i for i in os.listdir(folder) if os.path.splitext(i)[1] == '.mp3']
     return now_file_edit

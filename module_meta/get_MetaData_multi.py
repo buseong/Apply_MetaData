@@ -6,12 +6,6 @@ from .main_code import get_mp3_address, start
 
 
 def apply_meta(target):
-    """
-    apply meta data to mp3 file
-    :param target: str or list, explorer address to get meta data
-    # :param mode: int, user select mode
-    :return:
-    """
     timer = time.time()
     arr = [target]
     for i in arr:
@@ -45,6 +39,8 @@ def sort_num(arr_, num):
 
 
 def get_meta_multi(target: str = os.getcwd(), num: int = multiprocessing.cpu_count()):
+    if not isinstance(target, str):
+        raise ValueError(f'{target} is not string, {type(target)}')
     start_time = time.time()
     arr = get_mp3_address(target)
     if len(arr) < num:

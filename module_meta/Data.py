@@ -54,3 +54,7 @@ key_list: list[str] = ['title', 'album', 'track_num', 'artist', 'album_artist', 
 music_id_l: int = 4
 album_list_l: int = 3
 album_id_short: int = 7
+
+MelonAlbumUrl: str = "https://www.melon.com/album/detail.htm?albumId="
+MelonSongUrl: str = "https://www.melon.com/song/detail.htm?songId="
+MelonSong_tagUrl: str = "https://www.melon.com/search/song/index.htm?q="

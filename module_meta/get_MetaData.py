@@ -6,7 +6,7 @@ from .main_code import get_mp3_address, start
 
 def apply_meta(target: str or list = os.getcwd()):
     timer = time.time()
-    if type(target) is not list:
+    if not isinstance(target, list):
         if '.mp3' in target:
             arr = [target.replace("\\", "/")]
         else:
