@@ -1,19 +1,19 @@
 import multiprocessing
 import os
-import time
+from time import time
 
 from .main_code import get_mp3_address, start
 
 
 def apply_meta(target):
-    timer = time.time()
+    timer = time()
     arr = [target]
     for i in arr:
-        start_time = time.time()
+        start_time = time()
         start(i)
-        print(time.time() - start_time)
+        print(time() - start_time)
         print('-' * 130)
-    time_er = time.time() - timer
+    time_er = time() - timer
     print(f'Total : {time_er}')
     print(f'Avg__ : {time_er / len(arr)}')
     # print(f"not work : {arr_work}")
@@ -41,7 +41,7 @@ def sort_num(arr_, num):
 def get_meta_multi(target: str = os.getcwd(), num: int = multiprocessing.cpu_count()):
     if not isinstance(target, str):
         raise ValueError(f'{target} is not string, {type(target)}')
-    start_time = time.time()
+    start_time = time()
     arr = get_mp3_address(target)
     if len(arr) < num:
         raise ValueError(f'file num {len(arr)} > cpu num {num}')
@@ -52,5 +52,5 @@ def get_meta_multi(target: str = os.getcwd(), num: int = multiprocessing.cpu_cou
     pool.close()
     pool.join()
     print('='*90)
-    print(time.time() - start_time)
+    print(time() - start_time)
     return

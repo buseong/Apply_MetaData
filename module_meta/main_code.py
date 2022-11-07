@@ -25,7 +25,7 @@ def get_soup(url: str, usage: str):
 
 def _get_music_id(url: str, title: str) -> int:
     soup = get_soup(url, 'get_melon_info').select(".fc_gray")
-    music_id_list = [int(re.findall(r'melon.play.playSong\(\'.+?\',(.+?)\);', str(k))[0]) for k in soup]
+    music_id_list = [int(find_textByRe(r'melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
     title_list = [str(j['title']).rstrip(' - 페이지 이동') for j in soup]
     music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i is title]
     # album_list = [soup[i[0]].get_text() for i in enumerate(soup) if i[0] % 3 == 2]
@@ -62,7 +62,7 @@ def get_music_id(music_info: tuple) -> int:
             return get_music_id_by_title_artist(re.sub('\\([^)]*\\)+', '', title), artist)
         except(Exception,):
             try:
-                return get_music_id_by_title_artist(' '.join(re.findall(r'[가-힣]+', title)), artist)
+                return get_music_id_by_title_artist(' '.join(find_textByRe('[가-힣]+', title)), artist)
             except(Exception,):
                 try:
                     return get_music_id_by_title(title)
@@ -86,9 +86,11 @@ def get_title_artist_mp3(target_mp3: str) -> tuple:
     return info
 
 
-def pprint(*args):
-    for i in args:
-        print(i, end=' | ')
+def find_textByRe(pattern, text) -> str:
+    if not isinstance(text, str):
+        text = str(text)
+    find_text = str(re.findall(rf'{pattern}', text)[0])
+    return find_text
 
 
 def get_tag(music_id: int or str, target: str) -> int or str:
@@ -98,15 +100,15 @@ def get_tag(music_id: int or str, target: str) -> int or str:
     title = soup.select('.song_name')[0].get_text().replace('곡명', '').strip()
     album_name = soup.select('.list')[0]
     music_info = str(album_name.get_text()).replace("\n", '')
-    album_id = re.findall('goAlbumDetail\(\'(.+?)\'\);', str(album_name))[0]
-    album_names = re.findall("앨범(.+?)발매일", music_info)[0]
-    year = re.findall("발매일(.+?)장르", music_info)[0].replace('.', '-')
+    album_id = find_textByRe('goAlbumDetail\(\'(.+?)\'\);', album_name)
+    album_names = find_textByRe('앨범(.+?)발매일', music_info)
+    year = find_textByRe('발매일(.+?)장르', music_info).replace('.', '-')
     if 'FLAC' in music_info:
-        genre = re.findall("장르(.+?)FLAC", music_info)[0]
+        genre = find_textByRe('장르(.+?)FLAC', music_info)
     else:
-        genre = re.findall("장르(.+?)$", music_info)[0]
-    for i in soup.find_all("br"):
-        i.replace_with("\n")
+        genre = find_textByRe('장르(.+?)$', music_info)
+    for i in soup.find_all('br'):
+        i.replace_with('\n')
     try:
         lyric = soup.select(".lyric")[0].get_text().strip()
     except(Exception,) as e:
@@ -119,6 +121,11 @@ def get_tag(music_id: int or str, target: str) -> int or str:
     return album_names, album_artist, title, album_id, year, genre, lyric
 
 
+def get_imgByUrl(url):
+    img = request.urlopen(url).read()
+    return img
+
+
 def get_image_N_track(album_id: str or int, title: str) -> bytes and tuple:
     try:
         url = MelonAlbumUrl + str(album_id)
@@ -128,15 +135,15 @@ def get_image_N_track(album_id: str or int, title: str) -> bytes and tuple:
         soup = get_soup(url, 'get_album_img')
     album_img = soup.select('meta[property="og:image"]')[0]
     print(f"album : {url}")
-    urls = re.findall("(?:(?:https?|ftp)://)?[\\w/\\-?=%.]+\\.[\\w/\\-?=%.]+", str(album_img))[0]
+    urls = find_textByRe('(?:(?:https?|ftp)://)?[\\w/\\-?=%.]+\\.[\\w/\\-?=%.]+', album_img)
     try:
-        img = request.urlopen(urls.replace('500.jpg', '1000.jpg')).read()
+        img = get_imgByUrl(urls.replace('500.jpg', '1000.jpg'))
     except(Exception,):
-        img = request.urlopen(urls).read()
+        img = get_imgByUrl(urls)
     print(f'album img url : {urls}')
     title_in_album = []
     for i in soup.select('.wrap_song_info'):
-        ck_tmp = re.findall('>(.+?)</a>', str(i))[0]
+        ck_tmp = find_textByRe('>(.+?)</a>', i)
         if '&amp;' in ck_tmp:
             ck_tmp = ck_tmp.replace('&amp;', '&')
         if '(Inst.)' not in ck_tmp:
