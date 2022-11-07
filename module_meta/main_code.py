@@ -5,6 +5,7 @@ from urllib import request
 from urllib.parse import quote
 
 import eyed3
+import googletrans
 from bs4 import BeautifulSoup
 from eyed3.id3.frames import ImageFrame
 
@@ -124,6 +125,12 @@ def get_tag(music_id: int or str, target: str) -> int or str:
 def get_imgByUrl(url):
     img = request.urlopen(url).read()
     return img
+
+
+def trans_text(*args):
+    translator = googletrans.Translator()
+    result = [str(translator.translate(i, src='en', dest='ko').text).strip() for i in args]
+    return result
 
 
 def get_image_N_track(album_id: str or int, title: str) -> bytes and tuple:
