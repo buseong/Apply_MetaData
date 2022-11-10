@@ -7,29 +7,47 @@ from module_meta.get_MetaData_multi import get_meta_multi
 
 class Get_MetaData:
 
-    def __init__(self, address, mode):
+    def __init__(self, address, mode=0):
         self.address: str = address
         self.mode: int = mode
 
     @property
     def address(self):
-        return self._address  # property 사용해 리턴하는 함수를 변수처럼 만듦
+        return self._address
 
     @address.setter
     def address(self, address):
-        if len(os.listdir(address)) < 0:
-            raise NotADirectoryError(f'Not found File in {address}')
+        if not isinstance(address, str):
+            raise ValueError(f'{address} is not correct value type')
         else:
-            print('pass')
-            self._address = address  # 세터를 사용해 self._address 선언
+            if len(os.listdir(address)) < 0:
+                raise NotADirectoryError(f'Not found File in {address}')
+            else:
+                print('pass')
+                self._address = address
 
     @property
     def mode(self):
-        return self._mode
+        mode = self._mode
+        if mode == 0:
+            return 'single core'
+        elif mode == 1:
+            return 'multi core'
 
     @mode.setter
     def mode(self, mode):
-        self._mode = mode
+        if isinstance(mode, int):
+            if mode == 0:
+                self._mode = mode
+            elif mode == 1:
+                self._mode = mode
+        elif isinstance(mode, str):
+            if mode == 'single':
+                self._mode = 0
+            elif mode == 'multi':
+                self._mode = 1
+        else:
+            raise ValueError(f'{mode} is not correct value type or value')
 
     def start(self):
         if self._mode == 0:
@@ -38,7 +56,7 @@ class Get_MetaData:
             multiprocessing.freeze_support()
             get_meta_multi(self._address)
         else:
-            raise ValueError
+            raise RuntimeError('Something was wrong, please try late')
 
 
 if __name__ == '__main__':

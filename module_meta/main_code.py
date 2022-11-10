@@ -58,16 +58,16 @@ def get_music_id(music_info: tuple) -> int:
     artist = music_info[1]
     try:
         return get_music_id_by_title_artist(re.sub('\(*\)*', '', title), artist)
-    except(Exception,):
+    except:
         try:
             return get_music_id_by_title_artist(re.sub('\\([^)]*\\)+', '', title), artist)
-        except(Exception,):
+        except:
             try:
                 return get_music_id_by_title_artist(' '.join(find_textByRe('[가-힣]+', title)), artist)
-            except(Exception,):
+            except:
                 try:
                     return get_music_id_by_title(title)
-                except(Exception,):
+                except:
                     raise ValueError(f"Didn't search {title}, {artist}")
 
 
@@ -112,7 +112,7 @@ def get_tag(music_id: int or str, target: str) -> int or str:
         i.replace_with('\n')
     try:
         lyric = soup.select(".lyric")[0].get_text().strip()
-    except(Exception,) as e:
+    except Exception as e:
         print('No lyric')
         print(e)
         lyric = ''
@@ -137,7 +137,7 @@ def get_image_N_track(album_id: str or int, title: str) -> bytes and tuple:
     try:
         url = MelonAlbumUrl + str(album_id)
         soup = get_soup(url, 'get_album_img')
-    except(Exception,):
+    except:
         url = MelonAlbumUrl + str(album_id[:album_id_short])
         soup = get_soup(url, 'get_album_img')
     album_img = soup.select('meta[property="og:image"]')[0]
@@ -145,7 +145,7 @@ def get_image_N_track(album_id: str or int, title: str) -> bytes and tuple:
     urls = find_textByRe('(?:(?:https?|ftp)://)?[\\w/\\-?=%.]+\\.[\\w/\\-?=%.]+', album_img)
     try:
         img = get_imgByUrl(urls.replace('500.jpg', '1000.jpg'))
-    except(Exception,):
+    except:
         img = get_imgByUrl(urls)
     print(f'album img url : {urls}')
     title_in_album = []
@@ -183,21 +183,21 @@ def save_tag(target, **kwargs):
 
 def start(target: str):
     print(target)
-    album_name, album_artist, title, album_id, years, genre, lyric\
+    album_name, album_artist, title, album_id, years, genre, lyric \
         = get_tag(get_music_id(get_title_artist_mp3(target)), target)
     img, track_num = get_image_N_track(album_id, title)
     save_tag(
-            album=album_name,
-            album_artist=album_artist,
-            title=title,
-            image=img,
-            target=target,
-            genre=genre,
-            recording_date=years,
-            lyrics=lyric,
-            track_num=track_num,
-            artist=album_artist
-            )
+        album=album_name,
+        album_artist=album_artist,
+        title=title,
+        image=img,
+        target=target,
+        genre=genre,
+        recording_date=years,
+        lyrics=lyric,
+        track_num=track_num,
+        artist=album_artist
+    )
     return
 
 
