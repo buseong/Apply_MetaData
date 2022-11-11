@@ -37,6 +37,7 @@ artist_name_list: dict[str, str] = {
         'BOL4': '볼빨간사춘기',
         'Noel': '노을',
         'GyeongseoYej': '경서예지',
+        'Homies': '호미들',
 
     }
 

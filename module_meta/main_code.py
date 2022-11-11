@@ -63,12 +63,24 @@ def get_music_id(music_info: tuple) -> int:
             return get_music_id_by_title_artist(re.sub('\\([^)]*\\)+', '', title), artist)
         except:
             try:
-                return get_music_id_by_title_artist(' '.join(find_textByRe('[가-힣]+', title)), artist)
+                return get_music_id_by_title_artist(''.join(find_textByRe('[가-힣]+', title)), artist)
             except:
                 try:
-                    return get_music_id_by_title(title)
+                    return get_music_id((title, tran_Text(artist)[0]))
                 except:
-                    raise ValueError(f"Didn't search {title}, {artist}")
+                    pass
+                # except:
+                #     try:
+                #         return get_music_id_by_title(title)
+                #     except:
+                #         raise ValueError(f"Didn't search {title}, {artist}")
+
+
+def tran_Text(*args):
+    translator = googletrans.Translator()
+    result = [str(translator.translate(i, src='en', dest='ko').text).strip() for i in args]
+    print(f'{args} -> {result}')
+    return result
 
 
 def get_title_artist_mp3(target_mp3: str) -> tuple:
@@ -90,7 +102,10 @@ def get_title_artist_mp3(target_mp3: str) -> tuple:
 def find_textByRe(pattern, text) -> str:
     if not isinstance(text, str):
         text = str(text)
-    find_text = str(re.findall(rf'{pattern}', text)[0])
+    try:
+        find_text = str(re.findall(rf'{pattern}', text)[0])
+    except:
+        find_text = ''
     return find_text
 
 
@@ -112,25 +127,19 @@ def get_tag(music_id: int or str, target: str) -> int or str:
         i.replace_with('\n')
     try:
         lyric = soup.select(".lyric")[0].get_text().strip()
-    except Exception as e:
+    except:
         print('No lyric')
-        print(e)
         lyric = ''
     if '19금' in title:
-        raise ValueError("Don't get metadata")
-    print(album_names, album_artist, title, album_id, year, genre)
+        print("Don't get metadata")
+        title = str(title).lstrip('19금').strip()
+    # print(album_names, album_artist, title, album_id, year, genre)
     return album_names, album_artist, title, album_id, year, genre, lyric
 
 
 def get_imgByUrl(url):
     img = request.urlopen(url).read()
     return img
-
-
-def trans_text(*args):
-    translator = googletrans.Translator()
-    result = [str(translator.translate(i, src='en', dest='ko').text).strip() for i in args]
-    return result
 
 
 def get_image_N_track(album_id: str or int, title: str) -> bytes and tuple:

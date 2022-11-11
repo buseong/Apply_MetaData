@@ -11,6 +11,12 @@ class Get_MetaData:
         self.address: str = address
         self.mode: int = mode
 
+    @staticmethod
+    def pprint(text, loop=50):
+        print('-'*loop)
+        print(text)
+        print('-'*loop)
+
     @property
     def address(self):
         return self._address
