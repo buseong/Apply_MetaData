@@ -38,7 +38,10 @@ artist_name_list: dict[str, str] = {
         'Noel': '노을',
         'GyeongseoYej': '경서예지',
         'Homies': '호미들',
-
+        "BE'O": '비오',
+        'lIlBOI': '릴보이',
+        'JUSTHIS': '저스디스',
+        'DPR LIVE': '디피얼 라이브',
     }
 
 headers: list[list[(str, str)]] = [

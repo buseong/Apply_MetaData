@@ -1,15 +1,17 @@
-import os
+from os import path, listdir
 import re
 from random import randint
 from urllib import request
 from urllib.parse import quote
 
 import eyed3
-import googletrans
 from bs4 import BeautifulSoup
 from eyed3.id3.frames import ImageFrame
+from googletrans import Translator
 
 from .Data import *
+
+not_Work = []
 
 
 def get_soup(url: str, usage: str):
@@ -19,14 +21,26 @@ def get_soup(url: str, usage: str):
     request.install_opener(opener)
     html = request.urlopen(url)
     Soup = BeautifulSoup(html.read(), "html.parser")
-    print(f"{usage} : {url}")
+    pprint(f"{usage} : {url}")
     html.close()
     return Soup
 
 
+def pprint(text, types=...):
+    necessary_types = ['log']
+    if types is ...:
+        print(text)
+        # ...
+    elif types in necessary_types:
+        print(text)
+    else:
+        print(types, text)
+    return
+
+
 def _get_music_id(url: str, title: str) -> int:
     soup = get_soup(url, 'get_melon_info').select(".fc_gray")
-    music_id_list = [int(find_textByRe(r'melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
+    music_id_list = [int(find_textByRe('melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
     title_list = [str(j['title']).rstrip(' - 페이지 이동') for j in soup]
     music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i is title]
     # album_list = [soup[i[0]].get_text() for i in enumerate(soup) if i[0] % 3 == 2]
@@ -39,47 +53,79 @@ def _get_music_id(url: str, title: str) -> int:
     return music_id
 
 
+def insert_Url(*args) -> str:
+    args_convert = [quote(i) for i in args]
+    url = ' + '.join(args_convert)
+    return url
+
+
 def get_music_id_by_title_artist(title: str, artist: str) -> int:
     url = MelonSong_tagUrl + quote(title) + '+' + quote(artist)
-    print(f"{title} + {artist} : {url}")
+    pprint(f"{title} + {artist} : {url}")
     music_id = _get_music_id(url, title)
     return music_id
 
 
 def get_music_id_by_title(title: str) -> int:
     url = MelonSong_tagUrl + quote(title)
-    print(f"{title} : {url}")
+    pprint(f"{title} : {url}")
     music_id = _get_music_id(url, title)
     return music_id
+
+
+def not_working_list(target: str = ...):
+    if target is ...:
+        return not_Work
+    else:
+        not_Work.append(str(target))
+        return
+
+
+# def _search_algorithm(title: str = ..., artist: str = ...):
+#     try:
+#         if title is not ... and artist is not ...:
+#             return get_music_id_by_title_artist(title, artist)
+#         elif title is not ...:
+#             return get_music_id_by_title(title)
+#         else:
+#             pprint(f"Didn't search {title}, {artist}")
+#     except ValueError:
+#         pass
 
 
 def get_music_id(music_info: tuple) -> int:
     title = music_info[0]
     artist = music_info[1]
     try:
-        return get_music_id_by_title_artist(re.sub('\(*\)*', '', title), artist)
+        get_music_id_by_title_artist(title, artist)
     except:
         try:
-            return get_music_id_by_title_artist(re.sub('\\([^)]*\\)+', '', title), artist)
+            return get_music_id_by_title_artist(re.sub('\(*\)*', '', title), artist)
         except:
             try:
-                return get_music_id_by_title_artist(''.join(find_textByRe('[가-힣]+', title)), artist)
+                return get_music_id_by_title_artist(re.sub('\\([^)]*\\)+', '', title), artist)
             except:
                 try:
-                    return get_music_id((title, tran_Text(artist)[0]))
+                    return get_music_id_by_title_artist(''.join(find_textByRe('[가-힣]+', title)), artist)
                 except:
-                    pass
-                # except:
-                #     try:
-                #         return get_music_id_by_title(title)
-                #     except:
-                #         raise ValueError(f"Didn't search {title}, {artist}")
+                    try:
+                        return get_music_id_by_title_artist(tran_Text(title)[0], artist)
+                    except:
+                        try:
+                            return get_music_id_by_title_artist(title, tran_Text(artist)[0])
+                        except:
+                            try:
+                                return get_music_id_by_title_artist(tran_Text(title)[0], tran_Text(artist)[0])
+                            except:
+                                try:
+                                    return get_music_id_by_title(title)
+                                except:
+                                    raise ValueError(f"Didn't search {title}, {artist}")
 
 
-def tran_Text(*args):
-    translator = googletrans.Translator()
-    result = [str(translator.translate(i, src='en', dest='ko').text).strip() for i in args]
-    print(f'{args} -> {result}')
+def tran_Text(*args: tuple) -> list:
+    result = [str(Translator().translate(i, src='en', dest='ko').text).strip() for i in args]
+    pprint(f'{args} -> {result}')
     return result
 
 
@@ -128,17 +174,19 @@ def get_tag(music_id: int or str, target: str) -> int or str:
     try:
         lyric = soup.select(".lyric")[0].get_text().strip()
     except:
-        print('No lyric')
+        pprint('No lyric', 'get_tag')
         lyric = ''
     if '19금' in title:
-        print("Don't get metadata")
+        pprint(f"Don't get metadata, because '{title}' is music of only-adult", 'get_tag')
         title = str(title).lstrip('19금').strip()
-    # print(album_names, album_artist, title, album_id, year, genre)
     return album_names, album_artist, title, album_id, year, genre, lyric
 
 
-def get_imgByUrl(url):
-    img = request.urlopen(url).read()
+def get_imgByUrl(url: str) -> bytes:
+    try:
+        img = request.urlopen(url).read()
+    except:
+        img = b''
     return img
 
 
@@ -150,21 +198,21 @@ def get_image_N_track(album_id: str or int, title: str) -> bytes and tuple:
         url = MelonAlbumUrl + str(album_id[:album_id_short])
         soup = get_soup(url, 'get_album_img')
     album_img = soup.select('meta[property="og:image"]')[0]
-    print(f"album : {url}")
+    pprint(f"album : {url}")
     urls = find_textByRe('(?:(?:https?|ftp)://)?[\\w/\\-?=%.]+\\.[\\w/\\-?=%.]+', album_img)
     try:
         img = get_imgByUrl(urls.replace('500.jpg', '1000.jpg'))
     except:
         img = get_imgByUrl(urls)
-    print(f'album img url : {urls}')
+    pprint(f'album img url : {urls}')
     title_in_album = []
     for i in soup.select('.wrap_song_info'):
-        ck_tmp = find_textByRe('>(.+?)</a>', i)
-        if '&amp;' in ck_tmp:
-            ck_tmp = ck_tmp.replace('&amp;', '&')
-        if '(Inst.)' not in ck_tmp:
-            title_in_album.append(ck_tmp)
-    print(title_in_album)
+        _titleInAlbum = find_textByRe('>(.+?)</a>', i)
+        if '&amp;' in _titleInAlbum:
+            _titleInAlbum = _titleInAlbum.replace('&amp;', '&')
+        if '(Inst.)' not in _titleInAlbum:
+            title_in_album.append(_titleInAlbum)
+    pprint(title_in_album)
     track_num = ((int(title_in_album.index(title)) + 1), len(title_in_album))
     return img, track_num
 
@@ -185,13 +233,13 @@ def save_tag(target, **kwargs):
             else:
                 exec(f'audio_file.tag.{k} = "{v}"')
         else:
-            print(f'{k} is not in {key_list}')
+            pprint(f'{k} is not in {key_list}')
     audio_file.tag.save(encoding='utf-8')
     return
 
 
 def start(target: str):
-    print(target)
+    pprint(target)
     album_name, album_artist, title, album_id, years, genre, lyric \
         = get_tag(get_music_id(get_title_artist_mp3(target)), target)
     img, track_num = get_image_N_track(album_id, title)
@@ -207,6 +255,9 @@ def start(target: str):
         track_num=track_num,
         artist=album_artist
     )
+    # except ValueError:
+    #     not_working_list(target)
+    pprint(not_working_list())
     return
 
 
@@ -214,5 +265,5 @@ def get_mp3_address(target: str) -> list:
     if not isinstance(target, str):
         raise ValueError(f'{target} is not string, {type(target)}')
     folder = target.replace("\\", "/") + '/'
-    now_file_edit = [folder + i for i in os.listdir(folder) if os.path.splitext(i)[1] == '.mp3']
+    now_file_edit = [folder + i for i in listdir(folder) if path.splitext(i)[1] == '.mp3']
     return now_file_edit
