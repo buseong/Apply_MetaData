@@ -97,7 +97,7 @@ def get_music_id(music_info: tuple) -> int:
     title = music_info[0]
     artist = music_info[1]
     try:
-        get_music_id_by_title_artist(title, artist)
+        return get_music_id_by_title_artist(title, artist)
     except:
         try:
             return get_music_id_by_title_artist(re.sub('\(*\)*', '', title), artist)
@@ -255,8 +255,6 @@ def start(target: str):
         track_num=track_num,
         artist=album_artist
     )
-    # except ValueError:
-    #     not_working_list(target)
     pprint(not_working_list())
     return
 
