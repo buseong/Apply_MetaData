@@ -30,7 +30,7 @@ def remove_title_artist(target):
     for i in get_mp3_address(target):
         audio_tag = eyed3.load(i).tag
         audio_tag.artist = remove_rhksgh(audio_tag.artist)
-        audio_tag.albumArtist = remove_rhksgh(audio_tag.albumArtist)
+        audio_tag.album_artist = remove_rhksgh(audio_tag.album_artist)
         audio_tag.title = remove_rhksgh(audio_tag.title)
         audio_tag.album = remove_rhksgh(audio_tag.album)
         audio_tag.save(encoding='utf-8')
