@@ -9,7 +9,7 @@ artist_name_list: dict[str, str] = {
         'fromis_9': '프로미스나인',
         'JO YURI': '조유리',
         'fromis9': '프로미스나인',
-        'Various Artists': '',
+        'Various Artists': None,
         'IU': '아이유',
         'JEON SOMI': '전소미',
         'Baek A-yeon': '백아연',
@@ -55,8 +55,9 @@ headers: list[list[(str, str)]] = [
 
 key_list: list[str] = ['title', 'album', 'track_num', 'artist', 'album_artist', 'recording_date', 'genre', 'lyrics', 'image']
 
-music_id_l: int = 4
-album_list_l: int = 3
+expect_title: list[str] = ['’', '(remix)', '(Remix)', ' - 페이지 이동']
+expect_artist: list[str] = [' - Topic']
+
 album_id_short: int = 7
 
 MelonAlbumUrl: str = "https://www.melon.com/album/detail.htm?albumId="
