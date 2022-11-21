@@ -137,8 +137,7 @@ def get_metadata(target_mp3, log):
     if title_in_mp3 == 'None' or None:
         title_in_mp3 = str(audio_tag.album)
     music_id = get_music_id(title_in_mp3, artist_in_mp3, log)
-    url = MelonSongUrl + str(music_id)
-    soup = get_soup(url, 'get_tag',log)
+    soup = get_soup(MelonSongUrl + str(music_id), 'get_tag', log)
     album_artist = soup.select('.artist_name')[0].get_text()
     title = soup.select('.song_name')[0].get_text().replace('곡명', '').strip()
     album_name = soup.select('.list')[0]

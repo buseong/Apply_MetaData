@@ -69,7 +69,9 @@ def get_music_id(music_info: tuple) -> int:
 
     def _get_music_id(url: str, title: str) -> int:
         soup = get_soup(url, 'get_melon_info').select(".fc_gray")
-        music_id_list = [int(find_text('melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
+        if len(soup) == 0:
+            raise ValueError
+        music_id_list = [int(find_text(r'melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
         title_list = [remove_text(str(j['title'])) for j in soup]
         music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i is title]
         # album_list = [soup[i[0]].get_text() for i in enumerate(soup) if i[0] % 3 == 2]
@@ -100,35 +102,35 @@ def get_music_id(music_info: tuple) -> int:
     try:
         return get_music_id_by_title_artist(title, artist)
     except ValueError:
-        try:
-            return \
-                get_music_id_by_title_artist(re.sub('\(*\)*', '', title), artist)
-        except ValueError:
-            try:
-                return \
-                    get_music_id_by_title_artist(re.sub('\\([^)]*\\)+', '', title), artist)
-            except ValueError:
-                try:
-                    return \
-                        get_music_id_by_title_artist(''.join(find_text('[가-힣]+', title)), artist)
-                except ValueError:
-                    try:
-                        return \
-                            get_music_id_by_title_artist(tran_Text(title), artist)
-                    except ValueError:
-                        try:
-                            return \
-                                get_music_id_by_title_artist(title, tran_Text(artist))
-                        except ValueError:
-                            try:
-                                return \
-                                 get_music_id_by_title_artist(tran_Text(title), tran_Text(artist))
-                            except ValueError:
-                                try:
-                                    return \
-                                        get_music_id_by_title(title)
-                                except ValueError as error:
-                                    raise ValueError(f"Didn't search {title}, {artist}") from error
+        pass
+    try:
+        return get_music_id_by_title_artist(re.sub(r'\(*\)*', '', title), artist)
+    except ValueError:
+        pass
+    try:
+        return get_music_id_by_title_artist(re.sub(r'\\([^)]*\\)+', '', title), artist)
+    except ValueError:
+        pass
+    try:
+        return get_music_id_by_title_artist(''.join(find_text('[가-힣]+', title)), artist)
+    except ValueError:
+        pass
+    try:
+        return get_music_id_by_title_artist(tran_text(title), artist)
+    except ValueError:
+        pass
+    try:
+        return get_music_id_by_title_artist(title, tran_text(artist))
+    except ValueError:
+        pass
+    try:
+        return get_music_id_by_title_artist(tran_text(title), tran_text(artist))
+    except ValueError:
+        pass
+    try:
+        return get_music_id_by_title(title)
+    except ValueError as error:
+        raise ValueError(f"{error}: Didn't search '{title}, {artist}'") from error
 
 
 def spilt_text(text: str, spilt_t: str) -> list:
@@ -157,7 +159,7 @@ def remove_text(text: str):
     return text_r
 
 
-def tran_Text(text: str, spilt_t: str = '+') -> str:
+def tran_text(text: str, spilt_t: str = '+') -> str:
     """
     translation text
     :param text: to translation text
@@ -165,13 +167,18 @@ def tran_Text(text: str, spilt_t: str = '+') -> str:
     :return:
     """
     if spilt_t in text:
-        result = ' + '.join(tran_Text(remove_text(i).strip()) for i in spilt_text(text, spilt_t))
+        result = ' + '.join(tran_text(remove_text(i).strip()) for i in spilt_text(text, spilt_t))
     else:
         result = str(Translator().translate(text, src='en', dest='ko').text).strip()
     return result
 
 
 def get_title_artist_mp3(target_mp3: str) -> tuple:
+    """
+    get title and artist in mp3
+    :param target_mp3: to get title and artist
+    :return: info(title, artist)
+    """
     audio_tag = eyed3.load(target_mp3).tag
     artist = str(audio_tag.artist)
     if artist is None:
@@ -188,31 +195,42 @@ def get_title_artist_mp3(target_mp3: str) -> tuple:
     return info
 
 
-def find_text(pattern, text) -> str:
+def find_text(pattern, text: str) -> str:
+    """
+    find text by pattern
+    :param pattern: to get text pattern
+    :param text: text
+    :return: found text
+    """
     if not isinstance(text, str):
         text = str(text)
     try:
         find_text = str(re.findall(rf'{pattern}', text)[0])
-    except ValueError:
+    except IndexError:
         find_text = ''
     return find_text
 
 
 def get_tag(music_id: int or str) -> int or str:
+    """
+    get tag by music_id
+    :param music_id: to get tag music_id
+    :return: album_names:str, album_artist:str, title:str, album_id:int, year:str, genre:str, lyric:str
+    """
     url = MelonSongUrl + str(music_id)
     soup = get_soup(url, 'get_tag')
     album_artist = soup.select('.artist_name')[0].get_text()
     title = soup.select('.song_name')[0].get_text().replace('곡명', '').strip()
     album_name = soup.select('.list')[0]
     music_info = str(album_name.get_text()).replace("\n", '')
-    album_id = find_text('goAlbumDetail\(\'(.+?)\'\);', album_name)
+    album_id = find_text(r'goAlbumDetail\(\'(.+?)\'\);', album_name)
     album_names = find_text('앨범(.+?)발매일', music_info)
     year = find_text('발매일(.+?)장르', music_info).replace('.', '-')
     if 'FLAC' in music_info:
         genre = find_text('장르(.+?)FLAC', music_info)
     else:
         genre = find_text('장르(.+?)$', music_info)
-    for i in soup.find_all('br'):
+    for i in soup.find_all('br'):  # 추후 개선
         i.replace_with('\n')
     try:
         lyric = soup.select(".lyric")[0].get_text().strip()

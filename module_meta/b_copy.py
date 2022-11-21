@@ -21,7 +21,9 @@ def copy_file(target_1, target):
     return
 
 
-def remove_rhksgh(text):
+def remove_rhksgh(text) -> str:
+    if not isinstance(text, str):
+        text = str(text)
     text = re.sub('\\([^)]*\\)+', '', text)
     return text
 
