@@ -1,8 +1,8 @@
 """
 Made By Buseong
 """
-from os import path, listdir
 import re
+from os import path, listdir
 from random import randint
 from urllib import request
 from urllib.parse import quote
@@ -56,12 +56,14 @@ def not_working_list(target: str = ...):
     if target is ...:
         return not_work_list
     not_work_list.append(str(target))
+    return None
 
 
-def get_music_id(music_info: tuple) -> int:
+def get_music_id(music_info: tuple, target: str) -> int:
     """
     find music-id by title or artist
     :param music_info: (title, artist) if artist is not found, artist = None
+    :param target: to append 'not_working_list'-instance
     :return: music-id in melon
     """
     title = music_info[0]
@@ -73,6 +75,7 @@ def get_music_id(music_info: tuple) -> int:
             raise ValueError
         music_id_list = [int(find_text(r'melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
         title_list = [remove_text(str(j['title'])) for j in soup]
+        soup.clear()
         music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i is title]
         # album_list = [soup[i[0]].get_text() for i in enumerate(soup) if i[0] % 3 == 2]
         if len(music_id_list_) == 0:
@@ -130,6 +133,7 @@ def get_music_id(music_info: tuple) -> int:
     try:
         return get_music_id_by_title(title)
     except ValueError as error:
+        not_working_list(target)
         raise ValueError(f"{error}: Didn't search '{title}, {artist}'") from error
 
 
@@ -186,10 +190,11 @@ def get_title_artist_mp3(target_mp3: str) -> tuple:
     for i in expect_artist:
         if i in artist:
             artist = artist.replace(i, '')
-    if artist in artist_name_list:
-        artist = artist_name_list[artist]
+    # if artist in artist_name_list:
+    #     artist = artist_name_list[artist]
+    artist = artist_name_list.get(artist, artist)
     title = str(audio_tag.title)
-    if title is None or 'None':
+    if title == 'None' or title is None:
         title = str(audio_tag.album)
     info = (title, artist)
     return info
@@ -205,25 +210,25 @@ def find_text(pattern, text: str) -> str:
     if not isinstance(text, str):
         text = str(text)
     try:
-        find_text = str(re.findall(rf'{pattern}', text)[0])
+        find_text_value = str(re.findall(rf'{pattern}', text)[0])
     except IndexError:
-        find_text = ''
-    return find_text
+        find_text_value = ''
+    return find_text_value
 
 
 def get_tag(music_id: int or str) -> int or str:
     """
     get tag by music_id
     :param music_id: to get tag music_id
-    :return: album_names:str, album_artist:str, title:str, album_id:int, year:str, genre:str, lyric:str
+    :return: album_names:str, album_artist:str, title:str,
+            album_id:int, year:str, genre:str, lyric:str
     """
-    url = MelonSongUrl + str(music_id)
-    soup = get_soup(url, 'get_tag')
+    soup = get_soup(MelonSongUrl + str(music_id), 'get_tag')
     album_artist = soup.select('.artist_name')[0].get_text()
     title = soup.select('.song_name')[0].get_text().replace('곡명', '').strip()
     album_name = soup.select('.list')[0]
-    music_info = str(album_name.get_text()).replace("\n", '')
     album_id = find_text(r'goAlbumDetail\(\'(.+?)\'\);', album_name)
+    music_info = str(album_name.get_text()).replace('\n', '')
     album_names = find_text('앨범(.+?)발매일', music_info)
     year = find_text('발매일(.+?)장르', music_info).replace('.', '-')
     if 'FLAC' in music_info:
@@ -237,8 +242,10 @@ def get_tag(music_id: int or str) -> int or str:
     except RuntimeError:
         pprint('No lyric')
         lyric = ''
+    finally:
+        soup.clear()
     if '19금' in title:
-        pprint(f"Don't get metadata, because '{title}' is music of only-adult")
+        pprint(f'Do not get metadata, because "{title}" is music of only-adult')
         title = str(title).lstrip('19금').strip()
     return album_names, album_artist, title, album_id, year, genre, lyric
 
@@ -315,6 +322,12 @@ def save_tag(target, **kwargs):
     audio_file = eyed3.load(target)
     if not audio_file.tag:
         audio_file.initTag()
+    # for key, value, in  kwargs.items():
+    #     if key == 'lyrics':
+    #         audio_file.tag.lyrics.set(value)
+    #     elif key == 'track_num':
+    #         audio_file.tag.track_num = value
+    #     elif
     for key, value in kwargs.items():
         if key in key_list:
             if key == 'lyrics':
@@ -337,7 +350,7 @@ def start(target: str):
     """
     pprint(target)
     album_name, album_artist, title, album_id, years, genre, lyric \
-        = get_tag(get_music_id(get_title_artist_mp3(target)))
+        = get_tag(get_music_id(get_title_artist_mp3(target), target))
     img = get_album_img(album_id)
     track_num = get_track_num(album_id, title)
     save_tag(
