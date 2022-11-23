@@ -3,15 +3,25 @@ Made By Buseong
 """
 import os
 
+import eyed3
+from eyed3.id3.frames import ImageFrame
+
 from module_meta.get_data import get_metadata
 
 
-class Get_Metadata:
+class GetMetaData:
+    """
+    get metadata by title, artist in mp3-file
+    """
 
-    def __init__(self):
-        self.target = None
-        self.mode = None
-        self.log = None
+    def __init__(self,
+                 target: str,
+                 # mode: int = 0,
+                 log: bool = False
+                 ):
+        self.target = target
+        # self.mode = mode
+        self.log = log
         self.music_id = None
         self.title = None
         self.artist = None
@@ -23,11 +33,6 @@ class Get_Metadata:
         self.track_num = None
         self.album_img = None
 
-    def set(self, target='', mode=0, log=False):
-        self.target = target
-        self.mode = mode
-        self.log = log
-
     @property
     def target(self):
         return self._target
@@ -35,29 +40,29 @@ class Get_Metadata:
     @target.setter
     def target(self, target):
         if not isinstance(target, str):
-            raise TypeError(...)
+            raise TypeError(f'"{target}" is not str')
         self._target = target
 
-    @property
-    def mode(self):
-        if self._mode == 0:
-            return 'single'
-        if self._mode == 1:
-            return 'multi'
-        return f'Value Error Try Again, mode={self._mode}'
-
-    @mode.setter
-    def mode(self, mode):
-        if isinstance(mode, str):
-            if mode == 'single':
-                self._mode = 0
-            elif mode == 'multi':
-                self._mode = 1
-        elif isinstance(mode, int):
-            if mode == 0 or 1:
-                self._mode = mode
-        else:
-            raise ValueError(...)
+    # @property
+    # def mode(self):
+    #     if self._mode == 0:
+    #         return 'single'
+    #     if self._mode == 1:
+    #         return 'multi'
+    #     return f'Value Error Try Again, mode={self._mode}'
+    #
+    # @mode.setter
+    # def mode(self, mode):
+    #     if isinstance(mode, str):
+    #         if mode == 'single':
+    #             self._mode = 0
+    #         elif mode == 'multi':
+    #             self._mode = 1
+    #     elif isinstance(mode, int):
+    #         if mode == 0 or 1:
+    #             pass
+    #     else:
+    #         raise ValueError(...)
 
     @property
     def log(self):
@@ -78,7 +83,9 @@ class Get_Metadata:
         if self.target == '':
             raise ValueError
         if not os.path.isfile(target):
-            raise FileNotFoundError
+            raise FileNotFoundError(f'"{target}" - file is not found')
+        if not os.path.splitext(target)[1] == '.mp3':
+            raise FileNotFoundError(f'{target} is not mp3-file')
 
         self.music_id, \
             self.artist, \
@@ -90,7 +97,7 @@ class Get_Metadata:
             self.album_img, \
             self.track_num, \
             self.album_id = \
-            get_metadata(target, self.log)
+            get_metadata(target, self._log)
         self.pprint(self.music_id,
                     self.artist,
                     self.title,
@@ -110,7 +117,7 @@ class Get_Metadata:
         audio_file.tag.title = self.title
         audio_file.tag.album_artist = self.artist
         audio_file.tag.album = self.album_name
-        audio_file.tag.track_num = self.trackNum
+        audio_file.tag.track_num = self.track_num
         audio_file.tag.genre = self.album_genre
         audio_file.tag.artist = self.artist
         audio_file.tag.recording_date = self.album_year
@@ -132,7 +139,7 @@ class Get_Metadata:
 
 
 if __name__ == '__main__':
-    gt = Get_Metadata()
-    gt.set(target='', mode=0, log=False)
+    target = r'.\music.mp3'
+    gt = GetMetaData(target)
     gt.get_tag()
-    print(gt.__dict__)
+    print(gt.title, gt.artist)
