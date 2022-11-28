@@ -2,7 +2,8 @@ import multiprocessing
 import os
 from time import time
 
-from .main_code import get_mp3_address, start
+from .main_code import start
+from .utill.utill import get_mp3_address
 
 
 def apply_meta(target):

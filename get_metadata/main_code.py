@@ -2,66 +2,23 @@
 Made By Buseong
 """
 import re
-from os import path, listdir
-from os.path import isdir
-from random import randint
-from urllib import request
 from urllib.parse import quote
 
 import eyed3
-import psutil
-from bs4 import BeautifulSoup
 from eyed3.id3.frames import ImageFrame
-from googletrans import Translator
 
 from .Data import *
+from .utill.utill import (
+    get_soup,
+    get_img_by_url,
+    check_type,
+    pprint,
+    remove_text,
+    tran_text,
+    find_text
+    )
 
 not_work_list = []
-
-
-def get_soup(url: str, usage: str):
-    """
-    get soup
-    :param url: to get soup
-    :param usage: to record where this function was executed
-    :return: soup
-    """
-    chek_type(url, str)
-    chek_type(usage, str)
-
-    pprint(f"{usage} : {url}")
-    opener = request.build_opener()
-    header = headers[randint(0, len(headers) - 1)]
-    opener.addheaders = header
-    request.install_opener(opener)
-    with request.urlopen(url) as html:
-        soup = BeautifulSoup(html.read(), "html.parser")
-    return soup
-
-
-def chek_type(target, type_: type):
-    """
-    chek argument-instance - type
-    :param target: to chek argument-instance
-    :param type_: type
-    """
-    assert isinstance(target, type_), TypeError(f'"{target}" is not {type_}')
-
-
-def pprint(text, types: bool = True):
-    """
-    print text-instance but types-instance is False: Not print
-    :param text: to print text
-    :param types: decide print or no print in console
-    """
-    chek_type(types, bool)
-    if types:
-        memory_info = psutil.Process().memory_info()
-        rss = memory_info.rss / 2 ** 20
-        vms = memory_info.vms / 2 ** 20
-        print(f"RSS: {rss: 10.6f} MB, VMS: {vms: 10.6f} | {text}")
-    else:
-        pass
 
 
 def not_working_list(target: str = ...):
@@ -86,14 +43,17 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
     """
     title = music_info[0]
     artist = music_info[1]
-    chek_type(target, str)
+    check_type(target, str)
 
     def _get_music_id(url: str, title: str) -> int:
+        def remove_blank(text: str) -> str:
+            return str(text).replace(' ', '')
+        title = remove_blank(title)
         soup = get_soup(url, 'get_melon_info').select(".fc_gray")
         if len(soup) == 0:
             raise ValueError
         music_id_list = [int(find_text(r'melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
-        title_list = [remove_text(str(j['title'])) for j in soup]
+        title_list = [remove_text(remove_blank(j['title'])) for j in soup]
         soup.clear()
         music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i is title]
         # album_list = [soup[i[0]].get_text() for i in enumerate(soup) if i[0] % 3 == 2]
@@ -113,7 +73,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         return music_id
 
     def get_music_id_by_title_artist(title: str, artist: str) -> int:
-        if artist is None or artist == '':
+        if artist is None or artist == 'None' or artist == '':
             music_id = get_music_id_by_title(title)
         else:
             url = MelonSong_tagUrl + quote(title) + '+' + quote(artist)
@@ -156,89 +116,28 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         raise ValueError(f"{error}: Didn't search '{title}, {artist}'") from error
 
 
-def spilt_text(text: str, spilt_t: str) -> list:
-    """
-    spilt text
-    :param text: text to divide
-    :param spilt_t: to divide the text into
-    :return: text
-    """
-    return text.split(spilt_t)
-
-
-def remove_text(text: str):
-    """
-    remove text in text-instance
-    :param text: to remove text
-    :return: text
-    """
-    chek_type(text, str)
-    text_r = ''
-    for i in expect_title:
-        if i in text:
-            text_r = text.replace(i, '')
-            text = text_r
-        else:
-            text_r = text
-    return text_r
-
-
-def tran_text(text: str, spilt_t: str = '+') -> str:
-    """
-    translation text
-    :param text: to translation text
-    :param spilt_t:
-    :return:
-    """
-    chek_type(text, str)
-    chek_type(spilt_t, str)
-    if spilt_t in text:
-        result = ' + '.join(tran_text(remove_text(i).strip()) for i in spilt_text(text, spilt_t))
-    else:
-        result = str(Translator().translate(text, src='en', dest='ko').text).strip()
-    return result
-
-
 def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
     """
     get title and artist in mp3
     :param target_mp3: to get title and artist
     :return: info(title, artist)
     """
-    chek_type(target_mp3, str)
+    check_type(target_mp3, str)
 
     audio_tag = eyed3.load(target_mp3).tag
     artist = str(audio_tag.artist)
-    if artist is None:
+    if artist is None or artist == 'None':
         artist = ''
     for i in expect_artist:
         if i in artist:
             artist = artist.replace(i, '')
     # if artist in artist_name_list:
     #     artist = artist_name_list[artist]
-    artist = str(artist_name_list.get(artist, artist))
+    artist = str(artist_name_list.get(artist.strip(), artist))
     title = str(audio_tag.title)
-    if title == 'None' or title is None:
+    if title is None or title == 'None':
         title = str(audio_tag.album)
     return title, artist
-
-
-def find_text(pattern: str, text: str) -> str:
-    """
-    find text by pattern
-    :param pattern: to get text pattern
-    :param text: text
-    :return: found text
-    """
-    chek_type(pattern, str)
-
-    if not isinstance(text, str):
-        text = str(text)
-    try:
-        find_text_value = str(re.findall(rf'{pattern}', text)[0])
-    except IndexError:
-        find_text_value = ''
-    return find_text_value
 
 
 def get_tag(music_id: str or int) -> str or int:
@@ -261,12 +160,16 @@ def get_tag(music_id: str or int) -> str or int:
         genre = find_text('장르(.+?)FLAC', music_info)
     else:
         genre = find_text('장르(.+?)$', music_info)
-    soup = soup.select(".lyric")[0]
-    for i in soup.find_all('br'):
-        i.replace_with('\n')
+    soup = soup.select(".lyric")
     try:
+        if len(soup) == 0:
+            raise IndexError('No lyric')
+        else:
+            soup = soup[0]
+        for i in soup.find_all('br'):
+            i.replace_with('\n')
         lyric = str(soup.get_text()).strip()
-    except RuntimeError:
+    except IndexError:
         pprint('No lyric')
         lyric = ''
     finally:
@@ -275,21 +178,6 @@ def get_tag(music_id: str or int) -> str or int:
         pprint(f'Do not get metadata, because "{title}" is music of only-adult')
         title = str(title).lstrip('19금').strip()
     return album_names, album_artist, title, album_id, year, genre, lyric
-
-
-def get_img_by_url(url: str) -> bytes:
-    """
-    get img by url_img-instance
-    :param url: to get img url
-    :return: img
-    """
-    chek_type(url, str)
-    try:
-        with request.urlopen(url) as img:
-            img = img.read()
-    except RuntimeError:
-        img = b''
-    return img
 
 
 def get_album_img(album_id: str or int) -> bytes:
@@ -324,7 +212,7 @@ def get_track_num(album_id: str or int, title: str) -> tuple:
     :return: (music, total-music)
     """
     assert isinstance(album_id, (str, int)), f'"{album_id}" is not str or int'
-    chek_type(title, str)
+    check_type(title, str)
     try:
         url = MelonAlbumUrl + str(album_id)
         soup = get_soup(url, 'get_album_img')
@@ -338,28 +226,21 @@ def get_track_num(album_id: str or int, title: str) -> tuple:
             temp_title_in_album = temp_title_in_album.replace('&amp;', '&')
         if '(Inst.)' not in temp_title_in_album:
             title_in_album.append(temp_title_in_album)
-    pprint(title_in_album)
     track_num = ((int(title_in_album.index(title)) + 1), len(title_in_album))
     return track_num
 
 
-def save_tag(target: str, **kwargs):
+def save_tag(target: str, **kwargs: dict):
     """
     save tag
     :param target: to save mp3-file
     :param kwargs: to save tag in mp3-file
     """
-    chek_type(target, str)
+    check_type(target, str)
     eyed3.log.setLevel("ERROR")
     audio_file = eyed3.load(target)
     if not audio_file.tag:
         audio_file.initTag()
-    # for key, value, in  kwargs.items():
-    #     if key == 'lyrics':
-    #         audio_file.tag.lyrics.set(value)
-    #     elif key == 'track_num':
-    #         audio_file.tag.track_num = value
-    #     elif
     for key, value in kwargs.items():
         if key in key_list:
             if key == 'lyrics':
@@ -375,42 +256,33 @@ def save_tag(target: str, **kwargs):
     audio_file.tag.save(encoding='utf-8')
 
 
-def start(target: str):
+def start(target: str, return_type: bool = False):
     """
     start get-metadata
     :param target: to save metadata target-instance
+    :param return_type: to return metadata info
+    :return: return metadata
     """
-    chek_type(target, str)
+    check_type(target, str)
     pprint(target)
     album_name, album_artist, title, album_id, years, genre, lyric \
         = get_tag(get_music_id(get_title_artist_mp3(target), target))
     img = get_album_img(album_id)
     track_num = get_track_num(album_id, title)
-    save_tag(
-        album=album_name,
-        album_artist=album_artist,
-        title=title,
-        image=img,
-        target=target,
-        genre=genre,
-        recording_date=years,
-        lyrics=lyric,
-        track_num=track_num,
-        artist=album_artist
-    )
+
+    metadata_info: dict = {
+        'album': album_name,
+        'album_artist': album_artist,
+        'title': title,
+        'image': img,
+        'genre': genre,
+        'recording_date': years,
+        'lyrics': lyric,
+        'track_num': track_num,
+        'artist': album_artist,
+    }
     pprint(not_working_list())
-
-
-def get_mp3_address(target: str) -> list:
-    """
-    get address-mp3-file
-    :param target: to get explorer-address
-    :return: list-mp3-file
-    """
-    chek_type(target, str)
-    folder = target.replace("\\", "/")
-    assert isdir(folder), FileNotFoundError(f'"{folder}"-folder not found')
-    folder += '/'
-
-    now_file_edit = [folder + i for i in listdir(folder) if path.splitext(i)[1] == '.mp3']
-    return now_file_edit
+    if return_type:
+        return metadata_info
+    save_tag(target=target, **metadata_info)
+    return None

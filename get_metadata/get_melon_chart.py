@@ -10,20 +10,28 @@ arr_work: list = []
 
 
 def get_soup(url: str, usage: str):
-    opener = urllib.request.build_opener()
+    """
+    get soup
+    :param url: to get soup
+    :param usage: to record where this function was executed
+    :return: soup
+    """
+    check_type(url, str)
+    check_type(usage, str)
+
+    pprint(f'{usage} : {url}')
+    opener = request.build_opener()
     header = headers[randint(0, len(headers) - 1)]
     opener.addheaders = header
     request.install_opener(opener)
-    html = request.urlopen(url)
-    Soup = BeautifulSoup(html.read(), "html.parser")
-    print(f"{usage} : {url}")
-    html.close()
-    return Soup
+    with request.urlopen(url) as html:
+        soup = BeautifulSoup(html.read(), "html.parser")
+    return soup
 
 
 def get_melon():
     soup = get_soup('https://www.melon.com/chart/index.htm', 'chart')
-    top = 50  # 50) 50개 100) 50개 -> len-2
+    top = 50  # 50 -> top-50, 100 -> top-50 + top-100(len=50)
     id_list = [i['data-song-no'] for i in soup.select(f'.lst{top}')]
     print(id_list)
     return id_list

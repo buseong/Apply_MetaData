@@ -1,11 +1,13 @@
 import os
 from time import time
 
-from .main_code import get_mp3_address, start
+from .main_code import start
+from .utill.utill import get_mp3_address
 
 
 def apply_meta(target: str or list = os.getcwd()):
     timer = time()
+    # arr = map(lambda x: target.replace("\\", "/"), target)
     if not isinstance(target, list):
         if '.mp3' in target:
             arr = [target.replace("\\", "/")]
@@ -24,5 +26,6 @@ def apply_meta(target: str or list = os.getcwd()):
         print('-' * 130)
     time_er = time() - timer
     print(f'Total : {time_er}')
-    print(f'Avg__ : {time_er / len(arr)}')
+    if len(arr) != 0:
+        print(f'Avg__ : {time_er / len(arr)}')
     # print(f"not work : {arr_work}")

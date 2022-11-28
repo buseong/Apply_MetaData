@@ -4,12 +4,14 @@ Made By Buseong
 import os
 
 import eyed3
+import psutil
 from eyed3.id3.frames import ImageFrame
 
-from module_meta.get_data import get_metadata
+from get_metadata.main_code import start
+from get_metadata.Data import key_list
 
 
-class GetMetaData:
+class GetMetaDataBase(object):
     """
     get metadata by title, artist in mp3-file
     """
@@ -22,14 +24,12 @@ class GetMetaData:
         self.target = target
         # self.mode = mode
         self.log = log
-        self.music_id = None
         self.title = None
         self.artist = None
         self.album_name = None
         self.album_year = None
         self.album_genre = None
         self.music_lyric = None
-        self.album_id = None
         self.track_num = None
         self.album_img = None
 
@@ -87,25 +87,23 @@ class GetMetaData:
         if not os.path.splitext(target)[1] == '.mp3':
             raise FileNotFoundError(f'{target} is not mp3-file')
 
-        self.music_id, \
-            self.artist, \
-            self.title, \
-            self.album_name, \
-            self.album_year, \
-            self.album_genre, \
-            self.music_lyric, \
-            self.album_img, \
-            self.track_num, \
-            self.album_id = \
-            get_metadata(target, self._log)
-        self.pprint(self.music_id,
+        metadata_info = start(target, return_type=True)  # bt Data.key_list
+        self.album_name = metadata_info['album']
+        self.artist = metadata_info['album_artist']
+        self.title = metadata_info['title']
+        self.album_img = metadata_info['image']
+        self.album_genre = metadata_info['genre']
+        self.album_year = metadata_info['recording_date']
+        self.music_lyric = metadata_info['lyrics']
+        self.track_num = metadata_info['track_num']
+
+        self.pprint(
                     self.artist,
                     self.title,
                     self.album_name,
                     self.album_year,
                     self.album_genre,
                     self.track_num,
-                    self.album_id,
                     self.music_lyric
                     )
 
@@ -138,8 +136,12 @@ class GetMetaData:
                     print(i, end=' | ')
 
 
+class GetMetaData(GetMetaDataBase):
+    pass
+
+
 if __name__ == '__main__':
-    target = r'.\music.mp3'
+    target = r'G:\pyecharm\pythonProject\pythonProject\Apply_MetaData\music\Tick Tick Boom (Tick Tick Boom).mp3'
     gt = GetMetaData(target)
     gt.get_tag()
-    print(gt.title, gt.artist)
+    print(gt.title)

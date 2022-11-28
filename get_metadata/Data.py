@@ -43,6 +43,9 @@ artist_name_list: dict[str, str] = {
         'JUSTHIS': '저스디스',
         'DPR LIVE': '디피얼 라이브',
         'Dreamcatcher': '드림캐쳐',
+        'Kim Ye-ji': '김예지',
+        'Shin Youme': '신유미',
+
     }
 
 headers: list[list[(str, str)]] = [
