@@ -21,14 +21,14 @@ from .utill.utill import (
 not_work_list = []
 
 
-def not_working_list(target: str = ...):
+def not_working_list(target: str = None):
     """
     if target-instance is None, return "not_work_list": list
     if target-instance is not None, append target-instance to not_work_list
     :param target: file not running explorer address
     :return: not_work_list
     """
-    if target is ...:
+    if target is None:
         return not_work_list
     not_work_list.append(str(target))
     return None
@@ -43,7 +43,10 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
     """
     title = music_info[0]
     artist = music_info[1]
+
     check_type(target, str)
+    check_type(title, str)
+    check_type(artist, str)
 
     def _get_music_id(url: str, title: str) -> int:
         def remove_blank(text: str) -> str:
@@ -69,17 +72,14 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
     def get_music_id_by_title(title: str) -> int:
         url = MelonSong_tagUrl + quote(title)
         pprint(f"{title} : {url}")
-        music_id = _get_music_id(url, title)
-        return music_id
+        return _get_music_id(url, title)
 
     def get_music_id_by_title_artist(title: str, artist: str) -> int:
         if artist is None or artist == 'None' or artist == '':
-            music_id = get_music_id_by_title(title)
-        else:
-            url = MelonSong_tagUrl + quote(title) + '+' + quote(artist)
-            pprint(f"{title} + {artist} : {url}")
-            music_id = _get_music_id(url, title)
-        return music_id
+            return get_music_id_by_title(title)
+        url = MelonSong_tagUrl + quote(title) + '+' + quote(artist)
+        pprint(f"{title} + {artist} : {url}")
+        return _get_music_id(url, title)
 
     try:
         return get_music_id_by_title_artist(title, artist)
@@ -148,6 +148,7 @@ def get_tag(music_id: str or int) -> str or int:
             album_id:int, year:str, genre:str, lyric:str
     """
     assert isinstance(music_id, (str, int)), f'"{music_id}" is not str or int'
+    adult_only = '19금'
     soup = get_soup(MelonSongUrl + str(music_id), 'get_tag')
     album_artist = soup.select('.artist_name')[0].get_text()
     title = soup.select('.song_name')[0].get_text().replace('곡명', '').strip()
@@ -164,8 +165,7 @@ def get_tag(music_id: str or int) -> str or int:
     try:
         if len(soup) == 0:
             raise IndexError('No lyric')
-        else:
-            soup = soup[0]
+        soup = soup[0]
         for i in soup.find_all('br'):
             i.replace_with('\n')
         lyric = str(soup.get_text()).strip()
@@ -174,9 +174,9 @@ def get_tag(music_id: str or int) -> str or int:
         lyric = ''
     finally:
         soup.clear()
-    if '19금' in title:
+    if adult_only in title:
+        title = str(title).lstrip(adult_only).strip()
         pprint(f'Do not get metadata, because "{title}" is music of only-adult')
-        title = str(title).lstrip('19금').strip()
     return album_names, album_artist, title, album_id, year, genre, lyric
 
 
@@ -195,12 +195,13 @@ def get_album_img(album_id: str or int) -> bytes:
         soup = get_soup(url, 'get_album_img')
     album_img = soup.select('meta[property="og:image"]')[0]
     pprint(f"album : {url}")
-    urls = find_text('(?:(?:https?|ftp)://)?[\\w/\\-?=%.]+\\.[\\w/\\-?=%.]+', album_img)
+    # url = find_text('(?:(?:https?|ftp)://)?[\\w/\\-?=%.]+\\.[\\w/\\-?=%.]+', album_img)
+    url = find_text('content="(.+?)"', album_img)
     try:
-        img = get_img_by_url(urls.replace('500.jpg', '1000.jpg'))
+        img = get_img_by_url(url.replace('500.jpg', '1000.jpg'))
     except RuntimeError:
-        img = get_img_by_url(urls)
-    pprint(f'album img url : {urls}')
+        img = get_img_by_url(url)
+    pprint(f'album img url : {url}')
     return img
 
 
