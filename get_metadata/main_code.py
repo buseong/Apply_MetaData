@@ -251,10 +251,57 @@ def save_tag(target: str, **kwargs: dict):
             elif key == 'image':
                 audio_file.tag.images.set(ImageFrame.FRONT_COVER, value, 'image/jpeg')
             else:
-                exec(f'audio_file.tag.{key} = "{value}"')
+                setattr(audio_file.tag, key, value)
         else:
             pprint(f'{key} is not in {key_list}')
     audio_file.tag.save(encoding='utf-8')
+
+
+def tag_output_reformat(album_name: str = None,
+                        album_artist: str = None,
+                        title: str = None,
+                        genre: str = None,
+                        lyrics: str = None,
+                        recording_data: str = None,
+                        track_num: tuple = None,
+                        image: bytes = None,
+                        artist: str = None
+                        ) -> dict:
+    """
+    reformat for tag,
+    artist and album_artist is None: artist = album_artist = ''
+    album_artist is None: album_artist = artist
+    artist is None: artist = album_artist
+    :param title: str
+    :param genre:str
+    :param lyrics: str
+    :param artist: str
+    :param album_name: str
+    :param album_artist: str
+    :param recording_data: str[YYYY-MM-DD]
+    :param track_num: tuple[num, total_num]
+    :param image: bytes
+    :return: reformat-tag
+    """
+    if artist is None:
+        if album_artist is None:
+            album_artist = ''
+        artist = album_artist
+    else:
+        if album_artist is None:
+            album_artist = artist
+    metadata_info: dict = {
+        'album': album_name,
+        'album_artist': album_artist,
+        'title': title,
+        'image': image,
+        'genre': genre,
+        'recording_date': recording_data,
+        'lyrics': lyrics,
+        'track_num': track_num,
+        'artist': artist,
+    }
+    return metadata_info
 
 
 def start(target: str, return_type: bool = False):
@@ -270,18 +317,12 @@ def start(target: str, return_type: bool = False):
         = get_tag(get_music_id(get_title_artist_mp3(target), target))
     img = get_album_img(album_id)
     track_num = get_track_num(album_id, title)
-
-    metadata_info: dict = {
-        'album': album_name,
-        'album_artist': album_artist,
-        'title': title,
-        'image': img,
-        'genre': genre,
-        'recording_date': years,
-        'lyrics': lyric,
-        'track_num': track_num,
-        'artist': album_artist,
-    }
+    metadata_info = tag_output_reformat(
+        album_name=album_name, album_artist=album_artist,
+        title=title, genre=genre,
+        lyrics=lyric, recording_data=years,
+        track_num=track_num, image=img
+                                        )
     pprint(not_working_list())
     if return_type:
         return metadata_info

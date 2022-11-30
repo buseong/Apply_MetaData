@@ -57,6 +57,8 @@ def remove_title_artist(target):
         if not isinstance(text, str):
             text = str(text)
         text = re.sub('\\([^)]*\\)+', '', text)
+        # or
+        # text = re.sub(r'\(.+?\)', '', text)
         return text
 
     for i in get_mp3_address(target):

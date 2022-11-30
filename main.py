@@ -84,9 +84,8 @@ class GetMetaDataBase(object):
             raise ValueError
         if not os.path.isfile(target):
             raise FileNotFoundError(f'"{target}" - file is not found')
-        if not os.path.splitext(target)[1] == '.mp3':
+        if os.path.splitext(target)[1] != '.mp3':
             raise FileNotFoundError(f'{target} is not mp3-file')
-
         metadata_info = start(target, return_type=True)  # bt Data.key_list
         self.album_name = metadata_info['album']
         self.artist = metadata_info['album_artist']

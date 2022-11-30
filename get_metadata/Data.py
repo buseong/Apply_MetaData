@@ -45,8 +45,9 @@ artist_name_list: dict[str, str] = {
         'Dreamcatcher': '드림캐쳐',
         'Kim Ye-ji': '김예지',
         'Shin Youme': '신유미',
+        'Chuu': '츄'
 
-    }
+    }  # 데이터셋을 못찾겠음..
 
 headers: list[list[(str, str)]] = [
                [('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36')],
