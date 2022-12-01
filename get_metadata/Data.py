@@ -58,7 +58,7 @@ headers: list[list[(str, str)]] = [
                [('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) ')],
                ]
 
-key_list: list[str] = ['title', 'album', 'track_num', 'artist', 'album_artist', 'recording_date', 'genre', 'lyrics', 'image']
+tag_list: list[str] = ['title', 'album', 'track_num', 'artist', 'album_artist', 'recording_date', 'genre', 'lyrics', 'image']
 
 expect_title: list[str] = ['’', '(remix)', '(Remix)', ' - 페이지 이동']
 expect_artist: list[str] = [' - Topic']

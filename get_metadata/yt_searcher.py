@@ -45,7 +45,7 @@ def save_tag_(target, **kwargs):
     if not audio_file.tag:
         audio_file.initTag()
     for k, v in kwargs.items():
-        if k in key_list:
+        if k in tag_list:
             if k == 'lyrics':
                 audio_file.tag.lyrics.set(v)
             elif k == 'track_num':

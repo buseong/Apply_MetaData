@@ -18,7 +18,6 @@ def apply_meta(target):
     print(f'Total : {time_er}')
     print(f'Avg__ : {time_er / len(arr)}')
     # print(f"not work : {arr_work}")
-    return
 
 
 def sort_num(arr_, num):
@@ -54,4 +53,3 @@ def get_meta_multi(target: str = os.getcwd(), num: int = multiprocessing.cpu_cou
     pool.join()
     print('='*90)
     print(time() - start_time)
-    return

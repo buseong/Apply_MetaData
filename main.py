@@ -8,21 +8,19 @@ import psutil
 from eyed3.id3.frames import ImageFrame
 
 from get_metadata.main_code import start
-from get_metadata.Data import key_list
+from get_metadata.Data import tag_list
 
 
 class GetMetaDataBase(object):
     """
-    get metadata by title, artist in mp3-file
+    get metadata by title and artist in mp3-file
     """
 
     def __init__(self,
                  target: str,
-                 # mode: int = 0,
                  log: bool = False
                  ):
         self.target = target
-        # self.mode = mode
         self.log = log
         self.title = None
         self.artist = None
@@ -43,27 +41,6 @@ class GetMetaDataBase(object):
             raise TypeError(f'"{target}" is not str')
         self._target = target
 
-    # @property
-    # def mode(self):
-    #     if self._mode == 0:
-    #         return 'single'
-    #     if self._mode == 1:
-    #         return 'multi'
-    #     return f'Value Error Try Again, mode={self._mode}'
-    #
-    # @mode.setter
-    # def mode(self, mode):
-    #     if isinstance(mode, str):
-    #         if mode == 'single':
-    #             self._mode = 0
-    #         elif mode == 'multi':
-    #             self._mode = 1
-    #     elif isinstance(mode, int):
-    #         if mode == 0 or 1:
-    #             pass
-    #     else:
-    #         raise ValueError(...)
-
     @property
     def log(self):
         return self._log
@@ -74,8 +51,8 @@ class GetMetaDataBase(object):
             raise TypeError(f"'{log}' is not bool")
         self._log = log
 
-    def get_tag(self, target=...):
-        if target is ...:
+    def get_tag(self, target=None):
+        if target is None:
             target = self._target
         self.pprint(target)
         if target == '':
@@ -86,7 +63,7 @@ class GetMetaDataBase(object):
             raise FileNotFoundError(f'"{target}" - file is not found')
         if os.path.splitext(target)[1] != '.mp3':
             raise FileNotFoundError(f'{target} is not mp3-file')
-        metadata_info = start(target, return_type=True)  # bt Data.key_list
+        metadata_info = start(target, return_type=True)  # bt Data.tag_list
         self.album_name = metadata_info['album']
         self.artist = metadata_info['album_artist']
         self.title = metadata_info['title']
@@ -95,7 +72,6 @@ class GetMetaDataBase(object):
         self.album_year = metadata_info['recording_date']
         self.music_lyric = metadata_info['lyrics']
         self.track_num = metadata_info['track_num']
-
         self.pprint(
                     self.artist,
                     self.title,
@@ -127,7 +103,7 @@ class GetMetaDataBase(object):
         print args
         :param args: to print text: tuple
         """
-        if self.log:
+        if self._log:
             if len(args) == 1:
                 print(args[0])
             else:
@@ -136,11 +112,45 @@ class GetMetaDataBase(object):
 
 
 class GetMetaData(GetMetaDataBase):
-    pass
+    def __init__(self, target: str, log: bool = False):
+        super(GetMetaData, self).__init__(target=target, log=log)
+        self.meta_info = None
+
+    def get_tag(self, target=None):
+        if target is None:
+            if self._target is None:
+                raise ValueError(f'"{target} amd {self._target} is empty')
+            target = self._target
+        if not os.path.isfile(target):
+            raise FileNotFoundError(f'"{target}" - file is not found')
+        if os.path.splitext(target)[1] != '.mp3':
+            raise FileNotFoundError(f'{target} is not mp3-file')
+        self.meta_info = start(target, return_type=True)  # by Data.tag_list
+        for i in tag_list:
+            setattr(self, i, self.meta_info[i])
+
+    def save_tag(self):
+        eyed3.log.setLevel("ERROR")
+        audio_file = eyed3.load(self.target)
+        if not audio_file.tag:
+            audio_file.initTag()
+        for key, value in self.meta_info.items():
+            if key in tag_list:
+                if key == 'lyrics':
+                    audio_file.tag.lyrics.set(value)
+                elif key == 'track_num':
+                    audio_file.tag.track_num = value
+                elif key == 'image':
+                    audio_file.tag.images.set(ImageFrame.FRONT_COVER, value, 'image/jpeg')
+                else:
+                    setattr(audio_file.tag, key, value)
+            else:
+                pprint(f'{key} is not in {tag_list}')
+        audio_file.tag.save(encoding='utf-8')
 
 
 if __name__ == '__main__':
     target = r'G:\pyecharm\pythonProject\pythonProject\Apply_MetaData\music\Tick Tick Boom (Tick Tick Boom).mp3'
     gt = GetMetaData(target)
     gt.get_tag()
-    print(gt.title)
+    print(gt.artist)

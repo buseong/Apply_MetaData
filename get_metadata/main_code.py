@@ -54,7 +54,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         title = remove_blank(title)
         soup = get_soup(url, 'get_melon_info').select(".fc_gray")
         if len(soup) == 0:
-            raise ValueError
+            raise ValueError(f'Not found melone-music of music-tag in {target}')
         music_id_list = [int(find_text(r'melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
         title_list = [remove_text(remove_blank(j['title'])) for j in soup]
         soup.clear()
@@ -243,7 +243,7 @@ def save_tag(target: str, **kwargs: dict):
     if not audio_file.tag:
         audio_file.initTag()
     for key, value in kwargs.items():
-        if key in key_list:
+        if key in tag_list:
             if key == 'lyrics':
                 audio_file.tag.lyrics.set(value)
             elif key == 'track_num':
@@ -253,7 +253,7 @@ def save_tag(target: str, **kwargs: dict):
             else:
                 setattr(audio_file.tag, key, value)
         else:
-            pprint(f'{key} is not in {key_list}')
+            pprint(f'{key} is not in {tag_list}')
     audio_file.tag.save(encoding='utf-8')
 
 
