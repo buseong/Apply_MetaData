@@ -78,7 +78,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         if artist is None or artist == 'None' or artist == '':
             return get_music_id_by_title(title)
         url = MelonSong_tagUrl + quote(title) + '+' + quote(artist)
-        pprint(f"{title} + {artist} : {url}")
+        pprint(f'{title} + {artist} : {url}')
         return _get_music_id(url, title)
 
     try:
@@ -90,7 +90,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
     except ValueError:
         pass
     try:
-        return get_music_id_by_title_artist(re.sub(r'\\([^)]*\\)+', '', title), artist)
+        return get_music_id_by_title_artist(re.sub(r'\(.+?\)$', '', title), artist)
     except ValueError:
         pass
     try:
@@ -113,7 +113,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         return get_music_id_by_title(title)
     except ValueError as error:
         not_working_list(target)
-        raise ValueError(f"{error}: Didn't search '{title}, {artist}'") from error
+        raise ValueError(f'{error}: Did not search "{title}, {artist}"') from error
 
 
 def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
@@ -304,11 +304,11 @@ def tag_output_reformat(album_name: str = None,
     return metadata_info
 
 
-def start(target: str, return_type: bool = False):
+def start(target: str, return_bool: bool = False):
     """
     start get-metadata
     :param target: to save metadata target-instance
-    :param return_type: to return metadata info
+    :param return_bool: to return metadata info
     :return: return metadata
     """
     check_type(target, str)
@@ -324,7 +324,7 @@ def start(target: str, return_type: bool = False):
         track_num=track_num, image=img
                                         )
     pprint(not_working_list())
-    if return_type:
+    if return_bool:
         return metadata_info
     save_tag(target=target, **metadata_info)
     return None

@@ -37,8 +37,7 @@ def copy_file(copy_folder: str, paste_folder: str, extension: str = 'mp3'):
         if os.path.splitext(i)[1] == extension:
             file_in_folder.append(copy_folder + i)
             file_in_folder_address.append(os.path.splitext(i)[0] + extension)
-    for j in enumerate(file_in_folder_address):
-        j = j[0]
+    for j, _ in enumerate(file_in_folder_address):
         shutil.copy(file_in_folder[j], paste_folder + file_in_folder_address[j])
 
 
@@ -56,9 +55,8 @@ def remove_title_artist(target):
         """
         if not isinstance(text, str):
             text = str(text)
-        text = re.sub('\\([^)]*\\)+', '', text)
-        # or
-        # text = re.sub(r'\(.+?\)', '', text)
+            # text = text.__str__()
+        text = re.sub(r'\(.+?\)$', '', text)
         return text
 
     for i in get_mp3_address(target):

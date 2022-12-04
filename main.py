@@ -63,7 +63,7 @@ class GetMetaDataBase(object):
             raise FileNotFoundError(f'"{target}" - file is not found')
         if os.path.splitext(target)[1] != '.mp3':
             raise FileNotFoundError(f'{target} is not mp3-file')
-        metadata_info = start(target, return_type=True)  # bt Data.tag_list
+        metadata_info = start(target, return_bool=True)  # by Data.tag_list
         self.album_name = metadata_info['album']
         self.artist = metadata_info['album_artist']
         self.title = metadata_info['title']
@@ -112,20 +112,41 @@ class GetMetaDataBase(object):
 
 
 class GetMetaData(GetMetaDataBase):
-    def __init__(self, target: str, log: bool = False):
-        super(GetMetaData, self).__init__(target=target, log=log)
+    def __init__(self):
+        super(GetMetaData, self).__init__('')
         self.meta_info = None
+        if self.target == '':
+            self.target = None
+
+    @staticmethod
+    def check_type(target, types: type):
+        assert isinstance(target, types), TypeError(f'"{target}" is not {types.__name__}')
+
+    def set(self,
+            target: str,
+            log: bool = False
+            ):
+        self.check_type(target, str)
+        self.check_type(log, bool)
+        self.target = target
+        self.log = log
+
+    def target(self):
+        pass
+
+    def log(self):
+        pass
 
     def get_tag(self, target=None):
         if target is None:
-            if self._target is None:
-                raise ValueError(f'"{target} amd {self._target} is empty')
-            target = self._target
+            if self.target is None:
+                raise ValueError(f'"{target} amd {self.target} is empty')
+            target = self.target
         if not os.path.isfile(target):
             raise FileNotFoundError(f'"{target}" - file is not found')
         if os.path.splitext(target)[1] != '.mp3':
             raise FileNotFoundError(f'{target} is not mp3-file')
-        self.meta_info = start(target, return_type=True)  # by Data.tag_list
+        self.meta_info = start(target, return_bool=True)  # by Data.tag_list
         for i in tag_list:
             setattr(self, i, self.meta_info[i])
 
@@ -151,6 +172,8 @@ class GetMetaData(GetMetaDataBase):
 
 if __name__ == '__main__':
     target = r'G:\pyecharm\pythonProject\pythonProject\Apply_MetaData\music\Tick Tick Boom (Tick Tick Boom).mp3'
-    gt = GetMetaData(target)
+    gt = GetMetaData()
+    gt.set(target)
     gt.get_tag()
     print(gt.artist)
+
