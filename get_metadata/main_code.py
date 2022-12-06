@@ -63,7 +63,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
             raise GetSoupError(f'Not found melone-music of music-tag in {target}')
         music_id_list = [int(find_text(r'melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
         title_list = [remove_text(remove_blank(j['title'])) for j in soup]
-        soup.clear()
+        del soup
         music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i is title]
         # album_list = [soup[i[0]].get_text() for i in enumerate(soup) if i[0] % 3 == 2]
         if len(music_id_list_) == 0:
@@ -181,7 +181,7 @@ def get_tag(music_id: str or int) -> str or int:
         pprint('No lyric')
         lyric = ''
     finally:
-        soup.clear()
+        del soup
     if adult_only in title:
         title = str(title).lstrip(adult_only).strip()
         pprint(f'Do not get metadata, because "{title}" is music of only-adult')

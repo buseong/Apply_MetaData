@@ -10,6 +10,7 @@ artist_name_list: dict[str, str] = {
         'JO YURI': '조유리',
         'fromis9': '프로미스나인',
         'Various Artists': None,
+        'V/A': None,
         'IU': '아이유',
         'JEON SOMI': '전소미',
         'Baek A-yeon': '백아연',
