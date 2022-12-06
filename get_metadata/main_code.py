@@ -6,7 +6,7 @@ from urllib.parse import quote
 
 import eyed3
 from eyed3.id3.frames import ImageFrame
-
+from .utill.error_class import *
 from .Data import *
 from .utill.utill import (
     get_soup,
@@ -48,13 +48,19 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
     check_type(title, str)
     check_type(artist, str)
 
-    def _get_music_id(url: str, title: str) -> int:
+    def _get_music_id(url: str, title: str) -> int or None:
+        """
+        get music_id
+        :param url:
+        :param title:
+        :return: music_id but if soup is empty: return None
+        """
         def remove_blank(text: str) -> str:
             return str(text).replace(' ', '')
         title = remove_blank(title)
-        soup = get_soup(url, 'get_melon_info').select(".fc_gray")
+        soup = get_soup(url, 'get_melon_info').select('.fc_gray')
         if len(soup) == 0:
-            raise ValueError(f'Not found melone-music of music-tag in {target}')
+            raise GetSoupError(f'Not found melone-music of music-tag in {target}')
         music_id_list = [int(find_text(r'melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
         title_list = [remove_text(remove_blank(j['title'])) for j in soup]
         soup.clear()
@@ -69,51 +75,53 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
             music_id = int(music_id_list_[0])
         return music_id
 
-    def get_music_id_by_title(title: str) -> int:
+    def get_music_id_by_title(title: str) -> int or None:
         url = MelonSong_tagUrl + quote(title)
         pprint(f"{title} : {url}")
         return _get_music_id(url, title)
 
-    def get_music_id_by_title_artist(title: str, artist: str) -> int:
+    def get_music_id_by_title_artist(title: str, artist: str) -> int or None:
         if artist is None or artist == 'None' or artist == '':
             return get_music_id_by_title(title)
         url = MelonSong_tagUrl + quote(title) + '+' + quote(artist)
         pprint(f'{title} + {artist} : {url}')
         return _get_music_id(url, title)
 
+    search_error = SearchError
+
     try:
         return get_music_id_by_title_artist(title, artist)
-    except ValueError:
+    except search_error:
         pass
     try:
         return get_music_id_by_title_artist(re.sub(r'\(*\)*', '', title), artist)
-    except ValueError:
+    except search_error:
         pass
     try:
         return get_music_id_by_title_artist(re.sub(r'\(.+?\)$', '', title), artist)
-    except ValueError:
+    except search_error:
         pass
     try:
         return get_music_id_by_title_artist(''.join(find_text('[가-힣]+', title)), artist)
-    except ValueError:
+    except search_error:
         pass
     try:
         return get_music_id_by_title_artist(tran_text(title), artist)
-    except ValueError:
+    except search_error:
         pass
     try:
         return get_music_id_by_title_artist(title, tran_text(artist))
-    except ValueError:
+    except search_error:
         pass
     try:
         return get_music_id_by_title_artist(tran_text(title), tran_text(artist))
-    except ValueError:
+    except search_error:
         pass
     try:
         return get_music_id_by_title(title)
-    except ValueError as error:
+    except search_error as error:
         not_working_list(target)
-        raise ValueError(f'{error}: Did not search "{title}, {artist}"') from error
+        raise search_error(f'{error}: Did not search "{title}, {artist}"') from error
 
 
 def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
@@ -190,7 +198,7 @@ def get_album_img(album_id: str or int) -> bytes:
     try:
         url = MelonAlbumUrl + str(album_id)
         soup = get_soup(url, 'get_album_img')
-    except ValueError:
+    except GetInfoError:
         url = MelonAlbumUrl + str(album_id[:album_id_short])
         soup = get_soup(url, 'get_album_img')
     album_img = soup.select('meta[property="og:image"]')[0]
@@ -199,7 +207,7 @@ def get_album_img(album_id: str or int) -> bytes:
     url = find_text('content="(.+?)"', album_img)
     try:
         img = get_img_by_url(url.replace('500.jpg', '1000.jpg'))
-    except RuntimeError:
+    except GetInfoError:
         img = get_img_by_url(url)
     pprint(f'album img url : {url}')
     return img
@@ -217,7 +225,7 @@ def get_track_num(album_id: str or int, title: str) -> tuple:
     try:
         url = MelonAlbumUrl + str(album_id)
         soup = get_soup(url, 'get_album_img')
-    except ValueError:
+    except GetInfoError:
         url = MelonAlbumUrl + str(album_id[:album_id_short])
         soup = get_soup(url, 'get_album_img')
     title_in_album = []

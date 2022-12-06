@@ -148,7 +148,8 @@ class GetMetaData(GetMetaDataBase):
             raise FileNotFoundError(f'{target} is not mp3-file')
         self.meta_info = start(target, return_bool=True)  # by Data.tag_list
         for i in tag_list:
-            setattr(self, i, self.meta_info[i])
+            if hasattr(self, i):
+                setattr(self, i, self.meta_info[i])
 
     def save_tag(self):
         eyed3.log.setLevel("ERROR")
@@ -176,4 +177,3 @@ if __name__ == '__main__':
     gt.set(target)
     gt.get_tag()
     print(gt.artist)
-

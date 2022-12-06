@@ -45,7 +45,8 @@ artist_name_list: dict[str, str] = {
         'Dreamcatcher': '드림캐쳐',
         'Kim Ye-ji': '김예지',
         'Shin Youme': '신유미',
-        'Chuu': '츄'
+        'Chuu': '츄',
+        'KWON EUN BI': '권은비',
 
     }  # 데이터셋을 못찾겠음..
 
