@@ -48,6 +48,13 @@ artist_name_list: dict[str, str] = {
         'Shin Youme': '신유미',
         'Chuu': '츄',
         'KWON EUN BI': '권은비',
+        'KARA': '카라',
+        'Tophyun': '탑현',
+        'Seo In Guk': '서인국',
+        'Heize': '헤이즈',
+        'Yoon Mi-rae': '윤미래',
+        'meenoi': '미노이',
+        'K.Will': '케이윌'
 
     }  # 데이터셋을 못찾겠음..
 

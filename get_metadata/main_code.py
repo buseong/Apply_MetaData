@@ -43,10 +43,17 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
     """
     title = music_info[0]
     artist = music_info[1]
+    check_type((title, artist, target), str)
 
-    check_type(target, str)
-    check_type(title, str)
-    check_type(artist, str)
+    work_list = []
+
+    def check_work(work):
+        pprint(work)
+        if work in work_list:
+            return True
+        else:
+            work_list.append(work)
+            return False
 
     def _get_music_id(url: str, title: str) -> int or None:
         """
@@ -73,17 +80,22 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
             music_id = int(music_id_list[0])
         else:
             music_id = int(music_id_list_[0])
+        pprint.line()
         return music_id
 
     def get_music_id_by_title(title: str) -> int or None:
         url = MelonSong_tagUrl + quote(title)
-        pprint(f"{title} : {url}")
+        if check_work(url):
+            raise AlreadyExistsError
+        pprint(f'{title} : {url}')
         return _get_music_id(url, title)
 
     def get_music_id_by_title_artist(title: str, artist: str) -> int or None:
         if artist is None or artist == 'None' or artist == '':
             return get_music_id_by_title(title)
         url = MelonSong_tagUrl + quote(title) + '+' + quote(artist)
+        if check_work(url):
+            raise AlreadyExistsError
         pprint(f'{title} + {artist} : {url}')
         return _get_music_id(url, title)
 
