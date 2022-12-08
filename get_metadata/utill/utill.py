@@ -30,7 +30,7 @@ def get_soup(url: str, usage: str):
     return soup
 
 
-def check_type(target, type_):
+def check_type(target, type_: tuple[bool] or bool):
     """
     check argument-instance - type
     :param target: to chek argument-instance
@@ -48,24 +48,13 @@ def check_type(target, type_):
         if isinstance(type_, tuple):
             return all([check_type(target, i) for i in type_])
         return check_type(target, type_)
-    assert check(target, type_), TypeError(f'"{target}" is not {type_}')
+    if isinstance(type_, tuple):
+        msg = ' and '.join([i.__name__ for i in type_])
+    else:
+        msg = type_.__name__
+    assert check(target, type_), TypeError(f'"{target}" is not {msg}')
     return True
 
-
-# def pprint(text, types: bool = True):
-#     """
-#     print text-instance but types-instance is False: Not print
-#     :param text: to print text
-#     :param types: decide print or no print in console
-#     """
-#     check_type(types, bool)
-#     if types:
-#         memory_info = psutil.Process().memory_info()
-#         rss = memory_info.rss / 2 ** 20
-#         vms = memory_info.vms / 2 ** 20
-#         print(f"RSS: {rss: 10.6f} MB, VMS: {vms: 10.6f} | {text}")
-#     else:
-#         pass
 
 class pprint(object):
     def __init__(self, msg=None, types: bool = True, reformat: str = '10.6'):

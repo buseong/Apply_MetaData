@@ -167,7 +167,7 @@ def get_tag(music_id: str or int) -> str or int:
     :return: album_names:str, album_artist:str, title:str,
             album_id:int, year:str, genre:str, lyric:str
     """
-    assert isinstance(music_id, (str, int)), f'"{music_id}" is not str or int'
+    check_type(music_id, (str, int))
     adult_only = '19금'
     soup = get_soup(MelonSongUrl + str(music_id), 'get_tag')
     album_artist = soup.select('.artist_name')[0].get_text()
@@ -206,7 +206,7 @@ def get_album_img(album_id: str or int) -> bytes:
     :param album_id: to get album_img
     :return: album_img
     """
-    assert isinstance(album_id, (str, int)), f'"{album_id}" is not str or int'
+    check_type(album_id, (str, int))
     try:
         url = MelonAlbumUrl + str(album_id)
         soup = get_soup(url, 'get_album_img')
@@ -232,8 +232,8 @@ def get_track_num(album_id: str or int, title: str) -> tuple:
     :param title: title of music in album
     :return: (music, total-music)
     """
-    assert isinstance(album_id, (str, int)), f'"{album_id}" is not str or int'
     check_type(title, str)
+    check_type(album_id, (str, int))
     try:
         url = MelonAlbumUrl + str(album_id)
         soup = get_soup(url, 'get_album_img')
