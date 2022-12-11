@@ -39,29 +39,10 @@ def get_music(title, artist, target, num=0):
     download_yt(get_search_result(title, artist)[num], target)
 
 
-def save_tag_(target, **kwargs):
-    eyed3.log.setLevel("ERROR")
-    audio_file = eyed3.load(target)
-    if not audio_file.tag:
-        audio_file.initTag()
-    for k, v in kwargs.items():
-        if k in tag_list:
-            if k == 'lyrics':
-                audio_file.tag.lyrics.set(v)
-            elif k == 'track_num':
-                audio_file.tag.track_num = v
-            elif k == 'image':
-                audio_file.tag.images.set(ImageFrame.FRONT_COVER, v, 'image/jpeg')
-            else:
-                exec(f'audio_file.tag.{k} = "{v}"')
-    audio_file.tag.save(encoding='utf-8')
-    return
-
-
 def get_set_tag(music_id, target):
-    album_name, album_artist, title, album_id, year, genre, lyric = get_tag(music_id, target)
-    img, track_num = get_album_img(album_id, title)
-    save_tag_(
+    album_name, album_artist, title, album_id, year, genre, lyric = get_tag(music_id)
+    img, track_num = get_album_img(album_id)
+    save_tag(
         album=album_name,
         album_artist=album_artist,
         title=title,

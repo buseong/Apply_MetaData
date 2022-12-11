@@ -1,7 +1,7 @@
 import multiprocessing
 import os
 from time import time
-
+from .utill.utill import *
 from .main_code import start
 from .utill.utill import get_mp3_address
 
@@ -17,7 +17,6 @@ def apply_meta(target):
     time_er = time() - timer
     print(f'Total : {time_er}')
     print(f'Avg__ : {time_er / len(arr)}')
-    # print(f"not work : {arr_work}")
 
 
 def sort_num(arr_, num):
@@ -51,5 +50,5 @@ def get_meta_multi(target: str = os.getcwd(), num: int = multiprocessing.cpu_cou
         pool.map(apply_meta, brr[i])
     pool.close()
     pool.join()
-    print('='*90)
-    print(time() - start_time)
+    pprint.line()
+    pprint

@@ -1,3 +1,7 @@
+__all__ = ['artist_name_list', 'headers', 'tag_list', 'expect_artist', 'expect_title', 'album_id_short',
+           'MelonSongUrl', 'MelonSong_tagUrl', 'MelonAlbumUrl'
+          ]
+
 artist_name_list: dict[str, str] = {
         'LOONA': '이달의 소녀',
         'SUNMI': '선미',
@@ -54,7 +58,10 @@ artist_name_list: dict[str, str] = {
         'Heize': '헤이즈',
         'Yoon Mi-rae': '윤미래',
         'meenoi': '미노이',
-        'K.Will': '케이윌'
+        'K.Will': '케이윌',
+        'Lee Young Ji': '이영지',
+        'So Soo Bin': '소수빈',
+
 
     }  # 데이터셋을 못찾겠음..
 

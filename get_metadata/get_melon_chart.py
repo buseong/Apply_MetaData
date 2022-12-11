@@ -1,7 +1,7 @@
 import urllib
 from random import randint
 from urllib import request
-
+from utill.utill import check_type, pprint
 from bs4 import BeautifulSoup
 
 from Data import *
@@ -33,7 +33,6 @@ def get_melon():
     soup = get_soup('https://www.melon.com/chart/index.htm', 'chart')
     top = 50  # 50 -> top-50, 100 -> top-50 + top-100(len=50)
     id_list = [i['data-song-no'] for i in soup.select(f'.lst{top}')]
-    print(id_list)
     return id_list
 
 

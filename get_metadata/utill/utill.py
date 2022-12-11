@@ -3,12 +3,19 @@ from os import path, listdir
 from os.path import isdir
 from random import randint
 from urllib import request
-
+from time import time
 import psutil
 from bs4 import BeautifulSoup
 from googletrans import Translator
 
 from ..Data import headers, expect_title
+
+
+start_time = time()
+
+
+def time_count(reformat='10.6'):
+    return f'{time() - start_time: {reformat}f}'
 
 
 def get_soup(url: str, usage: str):
@@ -46,7 +53,7 @@ def check_type(target, type_: tuple[bool] or bool):
                 return all([check_type(i, type_) for i in target])
             return all([check_type(i, type_) for i in target])
         if isinstance(type_, tuple):
-            return all([check_type(target, i) for i in type_])
+            return any([check_type(target, i) for i in type_])
         return check_type(target, type_)
     if isinstance(type_, tuple):
         msg = ' and '.join([i.__name__ for i in type_])
@@ -63,7 +70,7 @@ class pprint(object):
                 memory_info = psutil.Process().memory_info()
                 rss = memory_info.rss / 2 ** 20
                 vms = memory_info.vms / 2 ** 20
-                print(f"RSS: {rss: {reformat}f} MB, VMS: {vms: {reformat}f} | {msg}")
+                print(f"{time_count()}| RSS: {rss: {reformat}f} MB, VMS: {vms: {reformat}f} | {msg}")
         else:
             pass
 
@@ -115,19 +122,23 @@ def tran_text(text: str, spilt_t: str = '+') -> str:
     return result
 
 
-def find_text(pattern: str, text: str) -> str:
+def find_text(pattern: str, text: str, all_str=False) -> str:
     """
     find text by pattern
     :param pattern: to get text pattern
     :param text: text
+    :param all_str: default is return first-list-index but all_str is True: return all list-index
     :return: found text
     """
-    check_type(pattern, str)
 
     if not isinstance(text, str):
         text = str(text)
     try:
-        find_text_value = str(re.findall(rf'{pattern}', text)[0])
+        find_text_value = re.findall(pattern, text)
+        if all_str:
+            find_text_value = ' '.join(find_text_value)
+        else:
+            find_text_value = str(find_text_value[0])
     except IndexError:
         find_text_value = ''
     return find_text_value

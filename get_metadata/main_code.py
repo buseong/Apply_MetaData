@@ -1,7 +1,7 @@
 """
 Made By Buseong
 """
-import re
+from re import sub
 from urllib.parse import quote
 
 import eyed3
@@ -51,16 +51,15 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         pprint(work)
         if work in work_list:
             return True
-        else:
-            work_list.append(work)
-            return False
+        work_list.append(work)
+        return False
 
     def _get_music_id(url: str, title: str) -> int or None:
         """
         get music_id
-        :param url:
-        :param title:
-        :return: music_id but if soup is empty: return None
+        :param url: to search url
+        :param title: to search-instance title
+        :return: music_id but if soup is empty: ValueError
         """
         def remove_blank(text: str) -> str:
             return str(text).replace(' ', '')
@@ -80,7 +79,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
             music_id = int(music_id_list[0])
         else:
             music_id = int(music_id_list_[0])
-        pprint.line()
+        # pprint.line()
         return music_id
 
     def get_music_id_by_title(title: str) -> int or None:
@@ -99,41 +98,39 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         pprint(f'{title} + {artist} : {url}')
         return _get_music_id(url, title)
 
+    def search_title_artist(title, artist):
+        try:
+            return get_music_id_by_title_artist(title, artist)
+        except search_error:
+            pass
+        try:
+            return get_music_id_by_title_artist(sub(r'\(*\)*', '', title), artist)
+        except search_error:
+            pass
+        try:
+            return get_music_id_by_title_artist(sub(r'\(.+?\)$', '', title), artist)
+        except search_error:
+            pass
+        try:
+            return get_music_id_by_title_artist(find_text('[가-힣]+', title, True), artist)
+        except search_error:
+            raise search_error
+
     search_error = SearchError
 
     try:
-        return get_music_id_by_title_artist(title, artist)
+        return search_title_artist(title, artist)
     except search_error:
         pass
     try:
-        return get_music_id_by_title_artist(re.sub(r'\(*\)*', '', title), artist)
-    except search_error:
-        pass
-    try:
-        return get_music_id_by_title_artist(re.sub(r'\(.+?\)$', '', title), artist)
-    except search_error:
-        pass
-    try:
-        return get_music_id_by_title_artist(''.join(find_text('[가-힣]+', title)), artist)
-    except search_error:
-        pass
-    try:
-        return get_music_id_by_title_artist(tran_text(title), artist)
-    except search_error:
-        pass
-    try:
-        return get_music_id_by_title_artist(title, tran_text(artist))
-    except search_error:
-        pass
-    try:
-        return get_music_id_by_title_artist(tran_text(title), tran_text(artist))
+        return search_title_artist(title, tran_text(artist))
     except search_error:
         pass
     try:
         return get_music_id_by_title(title)
     except search_error as error:
         not_working_list(target)
-        raise search_error(f'{error}: Did not search "{title}, {artist}"') from error
+        raise ValueError(f'{error}: Did not search "{title}, {artist}"') from error
 
 
 def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
@@ -151,8 +148,6 @@ def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
     for i in expect_artist:
         if i in artist:
             artist = artist.replace(i, '')
-    # if artist in artist_name_list:
-    #     artist = artist_name_list[artist]
     artist = str(artist_name_list.get(artist.strip(), artist))
     title = str(audio_tag.title)
     if title is None or title == 'None':
@@ -169,7 +164,7 @@ def get_tag(music_id: str or int) -> str or int:
     """
     check_type(music_id, (str, int))
     adult_only = '19금'
-    soup = get_soup(MelonSongUrl + str(music_id), 'get_tag')
+    soup = get_soup(MelonSongUrl + str(music_id), get_tag.__name__)
     album_artist = soup.select('.artist_name')[0].get_text()
     title = soup.select('.song_name')[0].get_text().replace('곡명', '').strip()
     album_name = soup.select('.list')[0]
@@ -209,12 +204,12 @@ def get_album_img(album_id: str or int) -> bytes:
     check_type(album_id, (str, int))
     try:
         url = MelonAlbumUrl + str(album_id)
-        soup = get_soup(url, 'get_album_img')
+        soup = get_soup(url, get_album_img.__name__)
     except GetInfoError:
         url = MelonAlbumUrl + str(album_id[:album_id_short])
-        soup = get_soup(url, 'get_album_img')
+        soup = get_soup(url, get_album_img.__name__)
     album_img = soup.select('meta[property="og:image"]')[0]
-    pprint(f"album : {url}")
+    pprint(f'album : {url}')
     # url = find_text('(?:(?:https?|ftp)://)?[\\w/\\-?=%.]+\\.[\\w/\\-?=%.]+', album_img)
     url = find_text('content="(.+?)"', album_img)
     try:
@@ -236,10 +231,10 @@ def get_track_num(album_id: str or int, title: str) -> tuple:
     check_type(album_id, (str, int))
     try:
         url = MelonAlbumUrl + str(album_id)
-        soup = get_soup(url, 'get_album_img')
+        soup = get_soup(url, get_track_num.__name__)
     except GetInfoError:
         url = MelonAlbumUrl + str(album_id[:album_id_short])
-        soup = get_soup(url, 'get_album_img')
+        soup = get_soup(url, get_track_num.__name__)
     title_in_album = []
     for i in soup.select('.wrap_song_info'):
         temp_title_in_album = find_text('>(.+?)</a>', i)
@@ -266,8 +261,8 @@ def save_tag(target: str, **kwargs: dict):
         if key in tag_list:
             if key == 'lyrics':
                 audio_file.tag.lyrics.set(value)
-            elif key == 'track_num':
-                audio_file.tag.track_num = value
+            # elif key == 'track_num':
+            #     audio_file.tag.track_num = value
             elif key == 'image':
                 audio_file.tag.images.set(ImageFrame.FRONT_COVER, value, 'image/jpeg')
             else:
@@ -286,6 +281,7 @@ def tag_output_reformat(album_name: str = None,
                         track_num: tuple = None,
                         image: bytes = None,
                         artist: str = None
+
                         ) -> dict:
     """
     reformat for tag,
