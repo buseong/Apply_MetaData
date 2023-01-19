@@ -74,7 +74,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         # album_list = [soup[i[0]].get_text() for i in enumerate(soup) if i[0] % 3 == 2]
         if len(music_id_list_) == 0:
             music_id_list_ = [music_id_list[title_list.index(i)]
-                              for i in title_list if i in title or title in i]
+                              for i in title_list if i.lower() in title.lower() or title.lower() in i.lower()]
         if len(music_id_list_) == 0:
             music_id = int(music_id_list[0])
         else:
@@ -90,6 +90,8 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         return _get_music_id(url, title)
 
     def get_music_id_by_title_artist(title: str, artist: str) -> int or None:
+        if title is None or title == 'None' or title == '' or len(title) == 0:
+            raise search_error
         if artist is None or artist == 'None' or artist == '':
             return get_music_id_by_title(title)
         url = MelonSong_tagUrl + quote(title) + '+' + quote(artist)
@@ -104,7 +106,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         except search_error:
             pass
         try:
-            return get_music_id_by_title_artist(sub(r'\(*\)*', '', title), artist)
+            return get_music_id_by_title_artist(find_text('[가-힣]+', title, True), artist)
         except search_error:
             pass
         try:
@@ -112,7 +114,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         except search_error:
             pass
         try:
-            return get_music_id_by_title_artist(find_text('[가-힣]+', title, True), artist)
+            return get_music_id_by_title_artist(sub(r'\(*\)*', '', title), artist)
         except search_error:
             raise search_error
 
@@ -124,6 +126,10 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         pass
     try:
         return search_title_artist(title, tran_text(artist))
+    except search_error:
+        pass
+    try:
+        return search_title_artist(tran_text(sub("[가-힣]", '', title)), artist)
     except search_error:
         pass
     try:
@@ -176,7 +182,7 @@ def get_tag(music_id: str or int) -> str or int:
         genre = find_text('장르(.+?)FLAC', music_info)
     else:
         genre = find_text('장르(.+?)$', music_info)
-    soup = soup.select(".lyric")
+    soup = soup.select('.lyric')
     try:
         if len(soup) == 0:
             raise IndexError('No lyric')
@@ -210,7 +216,6 @@ def get_album_img(album_id: str or int) -> bytes:
         soup = get_soup(url, get_album_img.__name__)
     album_img = soup.select('meta[property="og:image"]')[0]
     pprint(f'album : {url}')
-    # url = find_text('(?:(?:https?|ftp)://)?[\\w/\\-?=%.]+\\.[\\w/\\-?=%.]+', album_img)
     url = find_text('content="(.+?)"', album_img)
     try:
         img = get_img_by_url(url.replace('500.jpg', '1000.jpg'))
@@ -261,8 +266,6 @@ def save_tag(target: str, **kwargs: dict):
         if key in tag_list:
             if key == 'lyrics':
                 audio_file.tag.lyrics.set(value)
-            # elif key == 'track_num':
-            #     audio_file.tag.track_num = value
             elif key == 'image':
                 audio_file.tag.images.set(ImageFrame.FRONT_COVER, value, 'image/jpeg')
             else:
@@ -338,7 +341,7 @@ def start(target: str, return_bool: bool = False):
         title=title, genre=genre,
         lyrics=lyric, recording_data=years,
         track_num=track_num, image=img
-                                        )
+        )
     pprint(not_working_list())
     if return_bool:
         return metadata_info

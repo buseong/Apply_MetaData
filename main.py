@@ -185,4 +185,4 @@ if __name__ == '__main__':
     gt = GetMetaData()
     gt.set(target)
     gt.get_tag()
-    print(gt.artist, gt.title)
+    print(dir(gt))

@@ -56,13 +56,10 @@ def remove_title_artist(target):
             text = str(text)
         text = re.sub(r'\(.+?\)$', '', text)
         return text
+
     tag_list = ['album_artist', 'title', 'album', 'artist']
     for i in get_mp3_address(target):
         audio_tag = eyed3.load(i).tag
-        # audio_tag.artist = remove_bracket(audio_tag.artist)
-        # audio_tag.album_artist = remove_bracket(audio_tag.album_artist)
-        # audio_tag.title = remove_bracket(audio_tag.title)
-        # audio_tag.album = remove_bracket(audio_tag.album)
         for j in tag_list:
             setattr(audio_tag, j, remove_bracket(getattr(audio_tag, j)))
         audio_tag.save(encoding='utf-8')

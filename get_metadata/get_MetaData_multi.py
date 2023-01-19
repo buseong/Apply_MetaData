@@ -51,4 +51,3 @@ def get_meta_multi(target: str = os.getcwd(), num: int = multiprocessing.cpu_cou
     pool.close()
     pool.join()
     pprint.line()
-    pprint
