@@ -17,7 +17,7 @@ def apply_meta(target: str or list = os.getcwd()):
         if not isinstance(target, str):
             raise TypeError(f'{target} is not str or list')
         arr = target
-    if len(arr) < 0:
+    if (n := len(arr)) < 0:
         raise NotADirectoryError or FileNotFoundError(f'Not found file in {arr}')
     for i in arr:
         start_time = time()
@@ -26,6 +26,6 @@ def apply_meta(target: str or list = os.getcwd()):
         print('-' * 130)
     time_er = time() - timer
     print(f'Total : {time_er}')
-    if len(arr) != 0:
-        print(f'Avg__ : {time_er / len(arr)}')
+    if n != 0:
+        print(f'Avg__ : {time_er / n}')
     # print(f"not work : {arr_work}")

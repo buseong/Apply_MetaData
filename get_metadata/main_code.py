@@ -79,7 +79,6 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
             music_id = int(music_id_list[0])
         else:
             music_id = int(music_id_list_[0])
-        # pprint.line()
         return music_id
 
     def get_music_id_by_title(title: str) -> int or None:
@@ -148,15 +147,13 @@ def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
     check_type(target_mp3, str)
 
     audio_tag = eyed3.load(target_mp3).tag
-    artist = str(audio_tag.artist)
-    if artist is None or artist == 'None':
+    if (artist := str(audio_tag.artist)) is None or 'None':
         artist = ''
     for i in expect_artist:
         if i in artist:
             artist = artist.replace(i, '')
     artist = str(artist_name_list.get(artist.strip(), artist))
-    title = str(audio_tag.title)
-    if title is None or title == 'None':
+    if (title := str(audio_tag.title)) is None or 'None':
         title = str(audio_tag.album)
     return title, artist
 

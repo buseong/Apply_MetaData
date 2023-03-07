@@ -42,8 +42,8 @@ def get_meta_multi(target: str = os.getcwd(), num: int = multiprocessing.cpu_cou
         raise ValueError(f'{target} is not string, {type(target)}')
     start_time = time()
     arr = get_mp3_address(target)
-    if len(arr) < num:
-        raise ValueError(f'file num {len(arr)} > cpu num {num}')
+    if (n := len(arr)) < num:
+        raise ValueError(f'file num {n} > cpu num {num}')
     brr = sort_num(arr, num)
     pool = multiprocessing.Pool(processes=num)
     for i in range(int(num)):

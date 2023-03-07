@@ -76,6 +76,22 @@ artist_name_list: dict[str, str] = {
         '자두': '더 자두',
         'The Jadu': '더 자두',
         'SG Wannabe': 'SG 워너비',
+        'miss A': '미쓰에이',
+        'lee hi': '이하이',
+        'dosii': '도시',
+        'BoA': '보아',
+        'Girls` Generation': '소녀시대',
+        'U SUNG EUN': '유성은',
+        'Seoul Philharmonic Orchestra': '서울시립교향악단',
+        'SEVENTEEN': '세븐틴',
+        'Secret': '시크릿',
+        'SISTAR': '씨스타',
+        'T-ara': '티아라',
+        'Hyolyn': '효린',
+        'Trouble Maker': '트러블메이커',
+        
+
+
 
     }  # 데이터셋을 못찾겠음..
 
@@ -91,7 +107,7 @@ headers: list[list[(str, str)]] = [
 tag_list: list[str] = ['title', 'album', 'track_num', 'artist', 'album_artist', 'recording_date', 'genre', 'lyrics', 'image']
 
 expect_title: list[str] = ['’', '(remix)', '(Remix)', ' - 페이지 이동']
-expect_artist: list[str] = [' - Topic', 'OFFICIAL']
+expect_artist: list[str] = [' - Topic', 'OFFICIAL', 'VEVO']
 
 album_id_short: int = 7
 
