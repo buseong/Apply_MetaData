@@ -147,13 +147,13 @@ def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
     check_type(target_mp3, str)
 
     audio_tag = eyed3.load(target_mp3).tag
-    if (artist := str(audio_tag.artist)) is None or 'None':
+    if (artist := str(audio_tag.artist)) is None or artist == 'None':
         artist = ''
     for i in expect_artist:
         if i in artist:
             artist = artist.replace(i, '')
     artist = str(artist_name_list.get(artist.strip(), artist))
-    if (title := str(audio_tag.title)) is None or 'None':
+    if (title := str(audio_tag.title)) is None or title == 'None':
         title = str(audio_tag.album)
     return title, artist
 
