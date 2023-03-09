@@ -75,6 +75,9 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         if len(music_id_list_) == 0:
             music_id_list_ = [music_id_list[title_list.index(i)]
                               for i in title_list if i.lower() in title.lower() or title.lower() in i.lower()]
+        for num, music_id in enumerate(music_id_list_):
+            if str(title_list[num]).lower() == title.lower():
+                return music_id
         if len(music_id_list_) == 0:
             music_id = int(music_id_list[0])
         else:
