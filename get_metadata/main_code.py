@@ -203,7 +203,7 @@ def get_tag(music_id: str or int) -> str or int:
         soup = soup[0]
         for i in soup.find_all('br'):
             i.replace_with('\n')
-        lyric = str(soup.get_text()).strip()
+        lyric = str(soup.get_text()).replace("\n", "\n\n").strip()
     except IndexError:
         pprint('No lyric')
         lyric = ''
