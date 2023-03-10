@@ -63,18 +63,32 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         """
         def remove_blank(text: str) -> str:
             return str(text).replace(' ', '')
+
+        def special_characters_remove(text):
+            arr = {
+                "cant": "can't",
+                "dont": "don't",
+                "didnt": "didn't",
+                "couldnt": "couldn't",
+            }
+            text = str(text).lower()
+            for i, j in arr.items():
+                if text.__contains__(j):
+                    text = text.replace(j, i)
+            return text
+
         title = remove_blank(title)
         soup = get_soup(url, 'get_melon_info').select('.fc_gray')
         if len(soup) == 0:
             raise GetSoupError(f'Not found melone-music of music-tag in {target}')
-        music_id_list = [int(find_text(r'melon.play.playSong\(\'.+?\',(.+?)\);', k)) for k in soup]
-        title_list = [remove_text(remove_blank(j['title'])) for j in soup]
+        music_id_list = [int(find_text(r'melon.play.playSong\(\'.+?\',(.+?)\);', i)) for i in soup]
+        title_list = [remove_text(remove_blank(i['title'])) for i in soup]
         del soup
-        music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i is title]
+        music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i.lower().__contains__(special_characters_remove(title.lower()))]
         # album_list = [soup[i[0]].get_text() for i in enumerate(soup) if i[0] % 3 == 2]
         if len(music_id_list_) == 0:
             music_id_list_ = [music_id_list[title_list.index(i)]
-                              for i in title_list if i.lower() in title.lower() or title.lower() in i.lower()]
+                              for i in title_list if i.lower().__contains__(title.lower()) or title.lower().__contains__(i.lower())]
         for num, music_id in enumerate(music_id_list_):
             if str(title_list[num]).lower() == title.lower():
                 return music_id
