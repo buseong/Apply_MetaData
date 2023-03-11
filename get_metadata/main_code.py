@@ -16,7 +16,7 @@ from .utill.utill import (
     remove_text,
     tran_text,
     find_text
-    )
+)
 
 not_work_list = []
 
@@ -43,7 +43,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
     """
     title = music_info[0]
     artist = music_info[1]
-    check_type((title, artist, target), str)
+    # check_type((title, artist, target), str)
 
     work_list = []
 
@@ -54,13 +54,14 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         work_list.append(work)
         return False
 
-    def _get_music_id(url: str, title: str) -> int or None:
+    def _get_music_id(url: str, title: str, artist: str) -> int or None:
         """
         get music_id
         :param url: to search url
         :param title: to search-instance title
         :return: music_id but if soup is empty: ValueError
         """
+
         def remove_blank(text: str) -> str:
             return str(text).replace(' ', '')
 
@@ -77,25 +78,66 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
                     text = text.replace(j, i)
             return text
 
-        title = remove_blank(title)
-        soup = get_soup(url, 'get_melon_info').select('.fc_gray')
+        title = remove_blank(title).lower()
+        artist = remove_blank(artist).lower()
+
+        if artist.__eq__(""):
+            artist = ""  # to None
+
+        soup = get_soup(url, 'get_melon_info')
+
         if len(soup) == 0:
+            raise GetSoupError('maybe internet-contact error or melon-sever down or ban')
+
+        music_id_list = [int(find_text(r'melon.play.playSong\(\'.+?\',(.+?)\);', i)) for i in soup.select('.fc_gray')]
+
+        if len(music_id_list).__eq__(0):
             raise GetSoupError(f'Not found melone-music of music-tag in {target}')
-        music_id_list = [int(find_text(r'melon.play.playSong\(\'.+?\',(.+?)\);', i)) for i in soup]
-        title_list = [remove_text(remove_blank(i['title'])) for i in soup]
+
+        title_list = [remove_text(remove_blank(i['title'])).lower() for i in soup.select('.fc_gray')]
+        artist_list = [find_text('title=\"(.+?) - 페이지 이동\">', i).lower() for i in soup.select("#artistName")]
         del soup
-        music_id_list_ = [music_id_list[title_list.index(i)] for i in title_list if i.lower().__contains__(special_characters_remove(title.lower()))]
+        # music_id_list_acc = [music_id_list[title_list.index(i)] for i in title_list if i.lower().__contains__(special_characters_remove(title.lower()))]
+        music_id_list_acc = []
+        title_list_acc = []
+        artist_list_acc = []
         # album_list = [soup[i[0]].get_text() for i in enumerate(soup) if i[0] % 3 == 2]
-        if len(music_id_list_) == 0:
-            music_id_list_ = [music_id_list[title_list.index(i)]
-                              for i in title_list if i.lower().__contains__(title.lower()) or title.lower().__contains__(i.lower())]
-        for num, music_id in enumerate(music_id_list_):
-            if str(title_list[num]).lower() == title.lower():
-                return music_id
-        if len(music_id_list_) == 0:
+        for i, j in enumerate(title_list):
+            if j.__contains__((_temp_title := special_characters_remove(title))) or _temp_title.__contains__(j):
+                artist_list_acc.append(artist_list[i])
+                music_id_list_acc.append(music_id_list[i])
+                title_list_acc.append(title_list[i])
+
+        # if len(music_id_list_acc) == 0:  # same len(artist_list_acc)
+        #     music_id_list_acc = [music_id_list[title_list.index(i)]
+        #                          for i in title_list if i.lower().__contains__(title.lower()) or title.lower().__contains__(i.lower())]
+
+        for num, music_id in enumerate(music_id_list_acc):
+            low_title = title_list_acc[num]
+            low_artist = artist_list_acc[num]
+
+            print(
+                low_title.__contains__(title),
+                low_title.__eq__(title),
+                artist.__contains__(artist),
+                artist.__eq__(artist),
+                  )
+
+            if low_title.__contains__(title):
+                if low_title.__eq__(title):
+                    if low_artist.__contains__(artist):
+                        return music_id
+                    elif low_artist.__eq__(artist):
+                        return music_id
+                    else:
+                        continue
+            else:
+                continue
+
+        if len(music_id_list_acc).__eq__(0):
             music_id = int(music_id_list[0])
         else:
-            music_id = int(music_id_list_[0])
+            music_id = int(music_id_list_acc[0])
         return music_id
 
     def get_music_id_by_title(title: str) -> int or None:
@@ -103,7 +145,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         if check_work(url):
             raise AlreadyExistsError
         pprint(f'{title} : {url}')
-        return _get_music_id(url, title)
+        return _get_music_id(url, title, "")
 
     def get_music_id_by_title_artist(title: str, artist: str) -> int or None:
         if title is None or title == 'None' or title == '' or len(title) == 0:
@@ -114,7 +156,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         if check_work(url):
             raise AlreadyExistsError
         pprint(f'{title} + {artist} : {url}')
-        return _get_music_id(url, title)
+        return _get_music_id(url, title, artist)
 
     def search_title_artist(title, artist):
         try:
@@ -152,7 +194,8 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         return get_music_id_by_title(title)
     except search_error as error:
         not_working_list(target)
-        raise ValueError(f'{error}: Did not search "{title}, {artist}"') from error
+        # raise ValueError(f'{error}: Did not search "{title}, {artist}"') from error
+        print(error)
 
 
 def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
@@ -232,7 +275,7 @@ def get_album_img(album_id: str or int) -> bytes:
     pprint(f'album : {url}')
     url = find_text('content="(.+?)"', album_img)
     try:
-        img = get_img_by_url(url.replace('500.jpg', '1000.jpg'))
+        img = get_img_by_url((url := url.replace('500.jpg', '1000.jpg')))
     except GetInfoError:
         img = get_img_by_url(url)
     pprint(f'album img url : {url}')
@@ -355,7 +398,7 @@ def start(target: str, return_bool: bool = False):
         title=title, genre=genre,
         lyrics=lyric, recording_data=years,
         track_num=track_num, image=img
-        )
+    )
     pprint(not_working_list())
     if return_bool:
         return metadata_info

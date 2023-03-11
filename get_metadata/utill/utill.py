@@ -18,7 +18,7 @@ def time_count(reformat='10.6'):
     return f'{time() - start_time: {reformat}f}'
 
 
-def get_soup(url: str, usage: str):
+def get_soup(url: str, usage: str = ""):
     """
     get soup
     :param url: to get soup
