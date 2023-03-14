@@ -106,7 +106,8 @@ headers: list[list[(str, str)]] = [
 
 tag_list: list[str] = ['title', 'album', 'track_num', 'artist', 'album_artist', 'recording_date', 'genre', 'lyrics', 'image']
 
-expect_title: list[str] = ['’', '(remix)', '(Remix)', ' - 페이지 이동']
+# expect_title: list[str] = ['’', '(remix)', '(Remix)', ' - 페이지 이동']
+expect_title: list[str] = [' - 페이지 이동']
 expect_artist: list[str] = [' - Topic', 'OFFICIAL', 'VEVO']
 
 album_id_short: int = 7

@@ -54,7 +54,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         work_list.append(work)
         return False
 
-    def _get_music_id(url: str, title: str, artist: str) -> int or None:
+    def _get_music_id(url: str, title: str, org_title: str, artist: str) -> int or None:
         """
         get music_id
         :param url: to search url
@@ -78,6 +78,17 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
                     text = text.replace(j, i)
             return text
 
+        def expect_string(text1: str, text2: str):
+            text1 = remove_blank(text1.lower())
+            text2 = remove_blank(text2.lower())
+
+            arr = ["version", "ver.", "ver", 'inst.', 'inst', 'instrumental']
+            for i in arr:
+                if text1.__contains__(i):
+                    for j in arr:
+                        if text2.__contains__(j):
+                            return True
+
         title = remove_blank(title).lower()
         artist = remove_blank(artist).lower()
 
@@ -97,6 +108,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         title_list = [remove_text(remove_blank(i['title'])).lower() for i in soup.select('.fc_gray')]
         artist_list = [find_text('title=\"(.+?) - 페이지 이동\">', i).lower() for i in soup.select("#artistName")]
         del soup
+
         # music_id_list_acc = [music_id_list[title_list.index(i)] for i in title_list if i.lower().__contains__(special_characters_remove(title.lower()))]
         music_id_list_acc = []
         title_list_acc = []
@@ -116,14 +128,18 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
             low_title = title_list_acc[num]
             low_artist = artist_list_acc[num]
 
-            print(
-                low_title.__contains__(title),
-                low_title.__eq__(title),
-                artist.__contains__(artist),
-                artist.__eq__(artist),
-                  )
+            # print(
+            #     low_title.__contains__(title),
+            #     low_title.__eq__(title),
+            #     artist.__contains__(artist),
+            #     artist.__eq__(artist),
+            #       )
 
             if low_title.__contains__(title):
+                if expect_string(low_title, title):
+                    return music_id
+                elif expect_string(low_title, org_title):
+                    return music_id
                 if low_title.__eq__(title):
                     if low_artist.__contains__(artist):
                         return music_id
@@ -140,39 +156,39 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
             music_id = int(music_id_list_acc[0])
         return music_id
 
-    def get_music_id_by_title(title: str) -> int or None:
+    def get_music_id_by_title(org_title: str, title: str) -> int or None:
         url = MelonSong_tagUrl + quote(title)
         if check_work(url):
             raise AlreadyExistsError
         pprint(f'{title} : {url}')
-        return _get_music_id(url, title, "")
+        return _get_music_id(url, title, org_title, "")
 
-    def get_music_id_by_title_artist(title: str, artist: str) -> int or None:
+    def get_music_id_by_title_artist(org_title: str, title: str, artist: str) -> int or None:
         if title is None or title == 'None' or title == '' or len(title) == 0:
             raise search_error
         if artist is None or artist == 'None' or artist == '':
-            return get_music_id_by_title(title)
+            return get_music_id_by_title(org_title, title)
         url = MelonSong_tagUrl + quote(title) + '+' + quote(artist)
         if check_work(url):
             raise AlreadyExistsError
         pprint(f'{title} + {artist} : {url}')
-        return _get_music_id(url, title, artist)
+        return _get_music_id(url, title, org_title, artist)
 
     def search_title_artist(title, artist):
         try:
-            return get_music_id_by_title_artist(title, artist)
+            return get_music_id_by_title_artist(title, title, artist)
         except search_error:
             pass
         try:
-            return get_music_id_by_title_artist(find_text('[가-힣]+', title, True), artist)
+            return get_music_id_by_title_artist(title, find_text('[가-힣]+', title, True), artist)
         except search_error:
             pass
         try:
-            return get_music_id_by_title_artist(sub(r'\(.+?\)$', '', title), artist)
+            return get_music_id_by_title_artist(title, sub(r'\(.+?\)$', '', title), artist)
         except search_error:
             pass
         try:
-            return get_music_id_by_title_artist(sub(r'\(*\)*', '', title), artist)
+            return get_music_id_by_title_artist(title, sub(r'\(*\)*', '', title), artist)
         except search_error:
             raise search_error
 
@@ -191,7 +207,7 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
     except search_error:
         pass
     try:
-        return get_music_id_by_title(title)
+        return get_music_id_by_title(title, title)
     except search_error as error:
         not_working_list(target)
         # raise ValueError(f'{error}: Did not search "{title}, {artist}"') from error
@@ -212,7 +228,23 @@ def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
     for i in expect_artist:
         if i in artist:
             artist = artist.replace(i, '')
-    artist = str(artist_name_list.get(artist.strip(), artist))
+
+    # artist = str(artist_name_list.get(artist.strip().lower(), artist))
+    for i, j in enumerate(tag_list):
+        i = str(i).lower()
+        artist = artist.lower()
+
+        if artist.__eq__(i):
+            artist = j
+            break
+        elif artist.__contains__(i) or i.__contains__(artist):
+            artist = j
+            break
+        else:
+            continue
+    else:
+        artist = artist  #skip
+
     if (title := str(audio_tag.title)) is None or title == 'None':
         title = str(audio_tag.album)
     return title, artist
@@ -302,8 +334,9 @@ def get_track_num(album_id: str or int, title: str) -> tuple:
         temp_title_in_album = find_text('>(.+?)</a>', i)
         if '&amp;' in temp_title_in_album:
             temp_title_in_album = temp_title_in_album.replace('&amp;', '&')
-        if '(Inst.)' not in temp_title_in_album:
-            title_in_album.append(temp_title_in_album)
+        # if '(Inst.)' not in temp_title_in_album:
+        #     title_in_album.append(temp_title_in_album)
+        title_in_album.append(temp_title_in_album)
     track_num = ((int(title_in_album.index(title)) + 1), len(title_in_album))
     return track_num
 
