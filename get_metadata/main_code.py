@@ -127,14 +127,15 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
             low_title = title_list_acc[num]
             low_artist = artist_list_acc[num]
 
-            # print(
-            #     low_title.__contains__(title),
-            #     low_title.__eq__(title),
-            #     artist.__contains__(artist),
-            #     artist.__eq__(artist),
-            #       )
-
-            if low_title.__contains__(title):
+            print(
+                low_title.__contains__(title),
+                low_title.__eq__(title),
+                artist.__contains__(artist),
+                artist.__eq__(artist),
+                  )
+            if low_title.__eq__(org_title) and low_artist.__eq__(artist):
+                return music_id
+            if low_title.__contains__(org_title):
                 if expect_string(low_title, title):
                     return music_id
                 elif expect_string(low_title, org_title):
