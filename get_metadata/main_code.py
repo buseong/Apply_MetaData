@@ -123,7 +123,6 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
         # if len(music_id_list_acc) == 0:  # same len(artist_list_acc)
         #     music_id_list_acc = [music_id_list[title_list.index(i)]
         #                          for i in title_list if i.lower().__contains__(title.lower()) or title.lower().__contains__(i.lower())]
-
         for num, music_id in enumerate(music_id_list_acc):
             low_title = title_list_acc[num]
             low_artist = artist_list_acc[num]
@@ -140,13 +139,18 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
                     return music_id
                 elif expect_string(low_title, org_title):
                     return music_id
-                if low_title.__eq__(title):
+                if low_title.__eq__(org_title):
                     if low_artist.__contains__(artist):
                         return music_id
                     elif low_artist.__eq__(artist):
                         return music_id
-                    else:
-                        continue
+            elif low_title.__eq__(title):
+                if low_artist.__contains__(artist):
+                    return music_id
+                elif low_artist.__eq__(artist):
+                    return music_id
+                else:
+                    continue
             else:
                 continue
 
@@ -228,22 +232,23 @@ def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
     for i in expect_artist:
         if i in artist:
             artist = artist.replace(i, '')
-
     # artist = str(artist_name_list.get(artist.strip().lower(), artist))
-    for i, j in enumerate(tag_list):
-        i = str(i).lower()
-        artist = artist.lower()
-
+    for i, j in artist_name_list.items():
+        i = i.lower().strip().replace(" ", "")
+        j = j.lower().strip().replace(" ", "")
+        artist = artist.lower().strip().replace(" ", "")
+        print(i, j, artist)
         if artist.__eq__(i):
             artist = j
             break
-        elif artist.__contains__(i) or i.__contains__(artist):
-            artist = j
-            break
+        # elif artist.__contains__(i) or i.__contains__(artist):
+        #     print('event!!')
+        #     artist = j
+        #     break
         else:
             continue
     else:
-        artist = artist  #skip
+        artist = artist  # skip
 
     if (title := str(audio_tag.title)) is None or title == 'None':
         title = str(audio_tag.album)

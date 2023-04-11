@@ -5,11 +5,13 @@ from .main_code import start
 from .utill.utill import get_mp3_address
 
 
-def apply_meta(target: str or list = os.getcwd()):
+def apply_meta(target: str or list = os.getcwd(), extension: str = 'mp3'):
     timer = time()
     # arr = map(lambda x: target.replace("\\", "/"), target)
+    if extension[0] != ".":
+        extension = "." + extension
     if not isinstance(target, list):
-        if '.mp3' in target:
+        if extension in target:
             arr = [target.replace("\\", "/")]
         else:
             arr = get_mp3_address(target)

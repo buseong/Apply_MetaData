@@ -13,8 +13,8 @@ artist_name_list: dict[str, str] = {
         'fromis_9': '프로미스나인',
         'JO YURI': '조유리',
         'fromis9': '프로미스나인',
-        'Various Artists': None,
-        'V/A': None,
+        'Various Artists': '',
+        'V/A': '',
         'IU': '아이유',
         'JEON SOMI': '전소미',
         'Baek A-yeon': '백아연',
@@ -89,6 +89,7 @@ artist_name_list: dict[str, str] = {
         'T-ara': '티아라',
         'Hyolyn': '효린',
         'Trouble Maker': '트러블메이커',
+        'gain': '가인'
         
 
 
