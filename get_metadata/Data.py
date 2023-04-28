@@ -89,10 +89,9 @@ artist_name_list: dict[str, str] = {
         'T-ara': '티아라',
         'Hyolyn': '효린',
         'Trouble Maker': '트러블메이커',
-        'gain': '가인'
-        
-
-
+        'gain': '가인',
+        'j.y.park': '박진영',
+        'ovan': '오반',
 
     }  # 데이터셋을 못찾겠음..
 

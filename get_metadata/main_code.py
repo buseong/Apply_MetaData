@@ -127,12 +127,6 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
             low_title = title_list_acc[num]
             low_artist = artist_list_acc[num]
 
-            print(
-                low_title.__contains__(title),
-                low_title.__eq__(title),
-                artist.__contains__(artist),
-                artist.__eq__(artist),
-                  )
             if low_title.__eq__(org_title) and low_artist.__eq__(artist):
                 return music_id
             if low_title.__contains__(org_title):
@@ -204,11 +198,27 @@ def get_music_id(music_info: tuple[str, str], target: str) -> int:
     except search_error:
         pass
     try:
+        return search_title_artist(tran_text(title), tran_text(artist))
+    except search_error:
+        pass
+    try:
         return search_title_artist(title, tran_text(artist))
     except search_error:
         pass
     try:
+        return search_title_artist(tran_text(title), artist)
+    except:
+        pass
+    try:
         return search_title_artist(tran_text(sub("[가-힣]", '', title)), artist)
+    except search_error:
+        pass
+    try:
+        return search_title_artist(tran_text(title), tran_text(sub("[가-힣]", '', artist)))
+    except search_error:
+        pass
+    try:
+        return search_title_artist(tran_text(title), sub("[가-힣]", '', artist))
     except search_error:
         pass
     try:
@@ -238,7 +248,6 @@ def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
         i = i.lower().strip().replace(" ", "")
         j = j.lower().strip().replace(" ", "")
         artist = artist.lower().strip().replace(" ", "")
-        print(i, j, artist)
         if artist.__eq__(i):
             artist = j
             break
