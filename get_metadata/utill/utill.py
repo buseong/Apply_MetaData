@@ -18,23 +18,36 @@ def time_count(reformat='10.6'):
     return f'{time() - start_time: {reformat}f}'
 
 
-def get_soup(url: str, usage: str = ""):
+count = [0]
+
+
+def get_soup(url: str, usage: str = "", count_ = False):
     """
     get soup
     :param url: to get soup
     :param usage: to record where this function was executed
     :return: soup
     """
-    check_type(url, str)
-    check_type(usage, str)
-    pprint(f'{usage} : {url}')
-    opener = request.build_opener()
-    header = headers[randint(0, len(headers) - 1)]
-    opener.addheaders = header
-    request.install_opener(opener)
-    with request.urlopen(url) as html:
-        soup = BeautifulSoup(html.read(), "html.parser")
-    return soup
+
+    def get_soup(url: str, usage: str = ""):
+
+        count[0] += 1
+
+        check_type(url, str)
+        check_type(usage, str)
+        pprint(f'{usage} : {url}')
+        opener = request.build_opener()
+        header = headers[randint(0, len(headers) - 1)]
+        opener.addheaders = header
+        request.install_opener(opener)
+        with request.urlopen(url) as html:
+            soup = BeautifulSoup(html.read(), "html.parser")
+        return soup
+
+    if count_:
+        return count[0]
+
+    return get_soup(url, usage)
 
 
 def check_type(target, type_: tuple[bool] or bool):

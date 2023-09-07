@@ -389,7 +389,6 @@ def tag_output_reformat(album_name: str = None,
                         track_num: tuple = None,
                         image: bytes = None,
                         artist: str = None
-
                         ) -> dict:
     """
     reformat for tag,
@@ -428,19 +427,27 @@ def tag_output_reformat(album_name: str = None,
     return metadata_info
 
 
-def start(target: str, return_bool: bool = False):
+def start(target: str, return_bool: bool = False, melon_id: int = -1):
     """
     start get-metadata
+    :param melon_id:
     :param target: to save metadata target-instance
     :param return_bool: to return metadata info
     :return: return metadata
     """
     check_type(target, str)
     pprint(target)
-    album_name, album_artist, title, album_id, years, genre, lyric \
-        = get_tag(get_music_id(get_title_artist_mp3(target), target))
+    if melon_id.__eq__(-1):
+        album_name, album_artist, title, album_id, years, genre, lyric \
+            = get_tag(get_music_id(get_title_artist_mp3(target), target))
+    else:
+        album_name, album_artist, title, album_id, years, genre, lyric \
+            = get_tag(melon_id)
     img = get_album_img(album_id)
-    track_num = get_track_num(album_id, title)
+    try:
+        track_num = get_track_num(album_id, title)
+    except:
+        track_num = (0, 0)
     metadata_info = tag_output_reformat(
         album_name=album_name, album_artist=album_artist,
         title=title, genre=genre,
@@ -451,4 +458,5 @@ def start(target: str, return_bool: bool = False):
     if return_bool:
         return metadata_info
     save_tag(target=target, **metadata_info)
+    pprint(f"soup count: {get_soup('', count_=True)}")
     return None
