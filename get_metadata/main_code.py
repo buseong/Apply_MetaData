@@ -241,7 +241,7 @@ def get_title_artist_mp3(target_mp3: str) -> tuple[str, str]:
     if (artist := str(audio_tag.artist)) is None or artist == 'None':
         artist = ''
     for i in expect_artist:
-        if i in artist:
+        if str(i).lower() in artist.lower():
             artist = artist.replace(i, '')
     # artist = str(artist_name_list.get(artist.strip().lower(), artist))
     for i, j in artist_name_list.items():
@@ -455,6 +455,7 @@ def start(target: str, return_bool: bool = False, melon_id: int = -1):
         track_num=track_num, image=img
     )
     pprint(not_working_list())
+    pprint(title, album_artist)
     if return_bool:
         return metadata_info
     save_tag(target=target, **metadata_info)

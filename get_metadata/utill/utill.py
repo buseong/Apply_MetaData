@@ -128,6 +128,9 @@ def tran_text(text: str, spilt_t: str = '+') -> str:
     """
     check_type(text, str)
     check_type(spilt_t, str)
+
+    if text == ' ' or text == '':
+        return ' '
     if spilt_t in text:
         result = ' + '.join(tran_text(remove_text(i).strip()) for i in spilt_text(text, spilt_t))
     else:
